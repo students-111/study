@@ -1,0 +1,14 @@
+# 调试与构建运行日志
+*.log
+*.out
+*.err
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# Keil 构建产物和用户本地状态
+empty/keil/Objects/
+empty/keil/*.map
+empty/keil/*.uvguix.*
+
