@@ -165,18 +165,25 @@ extern "C" {
 #define BOARD_GPIO_MOTOR_STBY_IOMUX                              (IOMUX_PINCM31)
 /* Defines for ENC_M1_A: GPIOB.15 with pinCMx 32 on package pin 3 */
 #define BOARD_GPIO_ENC_M1_A_PORT                                         (GPIOB)
+// pins affected by this interrupt request:["ENC_M1_A","ENC_M1_B","ENC_M2_A","ENC_M2_B"]
+#define BOARD_GPIO_INT_IRQN                                     (GPIOB_INT_IRQn)
+#define BOARD_GPIO_INT_IIDX                     (DL_INTERRUPT_GROUP1_IIDX_GPIOB)
+#define BOARD_GPIO_ENC_M1_A_IIDX                            (DL_GPIO_IIDX_DIO15)
 #define BOARD_GPIO_ENC_M1_A_PIN                                 (DL_GPIO_PIN_15)
 #define BOARD_GPIO_ENC_M1_A_IOMUX                                (IOMUX_PINCM32)
 /* Defines for ENC_M1_B: GPIOB.16 with pinCMx 33 on package pin 4 */
 #define BOARD_GPIO_ENC_M1_B_PORT                                         (GPIOB)
+#define BOARD_GPIO_ENC_M1_B_IIDX                            (DL_GPIO_IIDX_DIO16)
 #define BOARD_GPIO_ENC_M1_B_PIN                                 (DL_GPIO_PIN_16)
 #define BOARD_GPIO_ENC_M1_B_IOMUX                                (IOMUX_PINCM33)
 /* Defines for ENC_M2_A: GPIOB.12 with pinCMx 29 on package pin 64 */
 #define BOARD_GPIO_ENC_M2_A_PORT                                         (GPIOB)
+#define BOARD_GPIO_ENC_M2_A_IIDX                            (DL_GPIO_IIDX_DIO12)
 #define BOARD_GPIO_ENC_M2_A_PIN                                 (DL_GPIO_PIN_12)
 #define BOARD_GPIO_ENC_M2_A_IOMUX                                (IOMUX_PINCM29)
 /* Defines for ENC_M2_B: GPIOB.13 with pinCMx 30 on package pin 1 */
 #define BOARD_GPIO_ENC_M2_B_PORT                                         (GPIOB)
+#define BOARD_GPIO_ENC_M2_B_IIDX                            (DL_GPIO_IIDX_DIO13)
 #define BOARD_GPIO_ENC_M2_B_PIN                                 (DL_GPIO_PIN_13)
 #define BOARD_GPIO_ENC_M2_B_IOMUX                                (IOMUX_PINCM30)
 /* Defines for GRAY_D1: GPIOB.20 with pinCMx 48 on package pin 19 */

@@ -9,8 +9,7 @@
 /* ======== include ======== */
 
 #include <stdint.h>
-
-#include "bsp_gpio.h"
+#include <stdbool.h>
 
 /* ======== 可调参数宏定义 ======== */
 
@@ -42,29 +41,18 @@ typedef enum {
 } EncoderState_t;
 
 /**
- * @brief 编码器硬件配置结构体。
- */
-typedef struct {
-    void *phase_a_port;             /**< A 相 GPIO 端口，本工程由 BSP 持有。 */
-    bsp_gpio_pin_e phase_a_pin;     /**< A 相 GPIO 引脚。 */
-    void *phase_b_port;             /**< B 相 GPIO 端口，本工程由 BSP 持有。 */
-    bsp_gpio_pin_e phase_b_pin;     /**< B 相 GPIO 引脚。 */
-} EncoderHW_t;
-
-/**
  * @brief 编码器驱动实体结构体。
  */
 typedef struct {
-    EncoderHW_t hw;                 /**< 硬件配置。 */
-    int32_t count;                  /**< 累计编码器计数。 */
-    int16_t delta;                  /**< 本次刷新产生的计数增量。 */
-    EncoderState_t state;           /**< 当前状态。 */
-    uint8_t raw_state;              /**< 当前 A/B 相压缩状态。 */
-    uint8_t last_state;             /**< 上一帧 A/B 相压缩状态。 */
-    uint8_t has_state;              /**< 是否已经建立初始 A/B 相基准。 */
-    uint8_t enable;                 /**< 使能标志。 */
+    volatile int32_t count;         /**< 累计编码器计数。 */
+    volatile int16_t delta;         /**< 本次刷新产生的计数增量。 */
+    volatile EncoderState_t state;  /**< 当前状态。 */
+    volatile uint8_t raw_state;     /**< 当前 A/B 相压缩状态。 */
+    volatile uint8_t last_state;    /**< 上一帧 A/B 相压缩状态。 */
+    volatile uint8_t has_state;     /**< 是否已经建立初始 A/B 相基准。 */
+    volatile uint8_t enable;        /**< 使能标志。 */
     uint8_t reverse;                /**< 编码器安装方向，0 表示正装，1 表示反装。 */
-    uint32_t sequence;              /**< 每次刷新递增的样本序号。 */
+    volatile uint32_t sequence;     /**< 每次刷新递增的样本序号。 */
 } Encoder_t;
 
 /* ======== 公开 API ======== */
@@ -72,12 +60,10 @@ typedef struct {
 /**
  * @brief 初始化编码器驱动实体。
  * @param encoder 编码器实体。
- * @param hw 硬件配置。
  * @param reverse 安装方向，0 表示正装，1 表示反装。
  * @return 初始化成功返回 1，否则返回 0。
  */
-uint8_t Encoder_Init(Encoder_t *encoder, const EncoderHW_t *hw,
-    uint8_t reverse);
+uint8_t Encoder_Init(Encoder_t *encoder, uint8_t reverse);
 
 /**
  * @brief 使能或失能编码器。
@@ -88,11 +74,13 @@ uint8_t Encoder_Init(Encoder_t *encoder, const EncoderHW_t *hw,
 uint8_t Encoder_Enable(Encoder_t *encoder, uint8_t enable);
 
 /**
- * @brief 刷新一次正交编码器解码状态。
+ * @brief 根据一次 A/B 相边沿快照刷新正交解码状态。
  * @param encoder 编码器实体。
+ * @param phase_a A 相电平。
+ * @param phase_b B 相电平。
  * @return 刷新成功返回 1，否则返回 0。
  */
-uint8_t Encoder_Update(Encoder_t *encoder);
+uint8_t Encoder_Update(Encoder_t *encoder, bool phase_a, bool phase_b);
 
 /**
  * @brief 清零编码器累计计数和运行状态。

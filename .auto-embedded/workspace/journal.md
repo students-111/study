@@ -10,3 +10,12 @@ runtime: 使用 OpenOCD + arm-none-eabi-gdb 对 empty/keil/Objects/empty_LP_MSPM
 
 ## #4  task=-  phase=-
 break-loop: 按键后小车无论怎么按都不动 根因=KEY 任务10ms刷新但行车模式1ms刷新，pressed_edge在同一key快照内保持约10ms，被app_drive_mode_refresh重复消费导致模式连续跳转并可能回到STOP；修复=app_drive_mode按g_dal_key_sample[KEY1].sequence记录已消费事件，同一sequence只切换一次；验证=Keil重编译0错误0警告、Keil烧录Verify OK、AEMB门禁全PASS；防复发=已promote到spec/conventions。
+
+## #5  task=降低车轮速度参数  phase=REVIEW
+break-loop: 循迹方向反转，根因=灰度位置左负右正且 PID 已按设定值减输入生成正确符号，APP 又对 PID 输出额外取负；防复发=已 promote 到 spec/conventions，并用左右偏差真值表验证。
+
+## #6  task=编码器gpio双边沿中断解码改造  phase=PLAN
+break-loop: 编码器speed_cp上不去 根因=1ms轮询使10ms窗口最多观测约10count，属于采样时序上限而非PID问题 防复发=已promote到spec/conventions并用双边沿中断替代轮询
+
+## #7  task=编码器gpio双边沿中断解码改造  phase=REVIEW
+break-loop: 循迹打印后右轮不转/无线仍直走 根因=未限速阻塞串口打印+灰度有效电平按高有效解释 防复发=已promote到spec/conventions gotcha

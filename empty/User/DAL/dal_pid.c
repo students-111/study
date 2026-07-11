@@ -47,17 +47,18 @@ void dal_pid_init(void)
 {
     /* 左轮速度内环：Kp, Ki, Kd, 输出限幅, 积分限幅。 */
     dal_pid_config_one(&pid_gather[DAL_PID_ID_SPEED_LEFT],
-        8.0f, 0.8f, 0.0f, 300.0f, 250.0f);
+        40.5f, 0.8f, 0.03f, 1000.0f, 600.0f);
 
     /* 右轮速度内环：Kp, Ki, Kd, 输出限幅, 积分限幅。 */
     dal_pid_config_one(&pid_gather[DAL_PID_ID_SPEED_RIGHT],
-        8.0f, 0.8f, 0.0f, 300.0f, 250.0f);
+        40.0f, 0.8f, 0.03f, 1000.0f, 600.0f);
 
     /* 灰度循迹外环：Kp, Ki, Kd, 输出限幅, 积分限幅。 */
     dal_pid_config_one(&pid_gather[DAL_PID_ID_LINE],
-        0.0098f, 0.0f, 0.003f, 36.0f, 0.0f);
+        DAL_PID_LINE_KP, DAL_PID_LINE_KI, DAL_PID_LINE_KD,
+        DAL_PID_LINE_OUTPUT_LIMIT, DAL_PID_LINE_ITERM_LIMIT);
 
     /* 直线角度外环：Kp, Ki, Kd, 输出限幅, 积分限幅。 */
     dal_pid_config_one(&pid_gather[DAL_PID_ID_STRAIGHT_ANGLE],
-        0.000125f, 0.0f, 0.0f, 32767.0f, 0.0f);
+        0.000125f, 0.0f, 0.0f, 4.0f, 0.0f);
 }

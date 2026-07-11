@@ -397,6 +397,35 @@ int bsp_uart_printf(uart_id_e id, const char *format, ...)
     return len;
 }
 
+int bsp_uart_try_printf(uart_id_e id, const char *format, ...)
+{
+    va_list ap;
+    int len;
+
+    if (!bsp_uart_is_valid_id(id) || (format == NULL)) {
+        return -1;
+    }
+    if (bsp_uart_pending() != 0U) {
+        return -1;
+    }
+
+    va_start(ap, format);
+    len = vsnprintf((char *)g_bsp_uart_printf_buf, BSP_UART_PRINTF_BUF_SIZE,
+        format, ap);
+    va_end(ap);
+
+    if (len <= 0) {
+        return -1;
+    }
+
+    if ((uint32_t)len >= BSP_UART_PRINTF_BUF_SIZE) {
+        len = (int)(BSP_UART_PRINTF_BUF_SIZE - 1U);
+    }
+
+    return (bsp_uart_write_async(g_bsp_uart_printf_buf,
+        (size_t)len) == BSP_OK) ? len : -1;
+}
+
 size_t bsp_uart_pending(void)
 {
     return rt_ringbuffer_data_len(&g_bsp_uart_tx_rb);

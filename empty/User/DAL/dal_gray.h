@@ -23,6 +23,9 @@
 #define DAL_GRAY_WEIGHT_VALUES         -4.0f, -3.0f, -2.0f, -1.0f, \
                                         1.0f, 2.0f, 3.0f, 4.0f
 
+/* 灰度传感器检测到黑线时的有效电平；0 表示低电平有效，1 表示高电平有效。 */
+#define DAL_GRAY_ACTIVE_LEVEL_HIGH     (0U)
+
 /* ======== 类型定义 ======== */
 
 /**
@@ -30,10 +33,10 @@
  */
 typedef struct {
     uint8_t raw_mask;        /**< 八路灰度检测位图；bit0~bit7 对应 D1~D8，1 表示检测到线。 */
-    uint8_t active_count;    /**< 当前检测到线的通道数量。 */
+    uint8_t active_count;    /**< 当前有几个传感器检测到线。 */
     bool line_detected;      /**< 是否检测到线。 */
     bool cross_detected;     /**< 是否检测到十字或宽线。 */
-    float position;          /**< 加权线位，范围 -4.0f~+4.0f，左负右正。 */
+    float position;          /**< 加权线位，范围 -4.0f~+4.0f，左负右正。 车身相对于车中心的位置 */
     uint32_t sequence;       /**< 每次刷新递增的样本序号。 */
 } dal_gray_sample_t;
 

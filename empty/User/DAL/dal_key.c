@@ -8,15 +8,20 @@
 #include "dal_key.h"
 
 #include <stddef.h>
+#include <stdint.h>
 
-#include "bsp_gpio.h"
+#include "ti_msp_dl_config.h"
 
 /* ======== 可调参数宏定义 ======== */
 
 /* ======== 类型定义 ======== */
 
+/**
+ * @brief 按键通道运行状态。
+ */
 typedef struct {
-    bsp_gpio_pin_e pin;          /**< 按键使用的 BSP GPIO 引脚。 */
+    GPIO_Regs *port;             /**< 按键 GPIO 端口。 */
+    uint32_t pin;                /**< 按键 GPIO pin mask。 */
     bool active_high;            /**< true 表示高电平为按下。 */
     bool raw_last;               /**< 上一次采到的原始按下状态。 */
     bool stable_pressed;         /**< 当前消抖后的按下状态。 */
@@ -30,7 +35,8 @@ dal_key_sample_t g_dal_key_sample[DAL_KEY_COUNT];
 /* ======== 内部变量 ======== */
 
 static dal_key_channel_t g_dal_key1_channel = {
-    .pin = BSP_GPIO_KEY1,
+    .port = BOARD_GPIO_KEY1_PORT,
+    .pin = BOARD_GPIO_KEY1_PIN,
     .active_high = true,
 };
 
@@ -51,9 +57,8 @@ static bool dal_key_read_pressed(const dal_key_channel_t *channel,
         return false;
     }
 
-    if (bsp_gpio_read(channel->pin, &high) != BSP_OK) {
-        return false;
-    }
+    high = ((DL_GPIO_readPins(channel->port, channel->pin) & channel->pin) !=
+        0U);
 
     *pressed = channel->active_high ? high : !high;
     return true;
@@ -65,7 +70,6 @@ void dal_key_init(void)
 {
     unsigned int idx;
 
-    (void)bsp_gpio_init_input(BSP_GPIO_KEY1, BSP_GPIO_PULL_DOWN, true);
     g_dal_key1_channel.raw_last = false;
     g_dal_key1_channel.stable_pressed = false;
     g_dal_key1_channel.stable_ticks = 0U;

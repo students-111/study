@@ -195,13 +195,11 @@ static int16_t dal_mpu6050_be16(const uint8_t *buf)
 /**
  * @brief 将 double 工程量转换为 0.001 单位整数。
  * @param val 待转换工程量。
- * @return 0.001 单位整数。
+ * @return 截断后的 0.001 单位整数。
  */
 static int32_t dal_mpu6050_double_to_milli(double val)
 {
-    return (int32_t)((val >= 0.0) ?
-        (val * (double)DAL_MPU6050_MILLI_SCALE + DAL_MPU6050_ROUND_OFFSET) :
-        (val * (double)DAL_MPU6050_MILLI_SCALE - DAL_MPU6050_ROUND_OFFSET));
+    return (int32_t)(val * (double)DAL_MPU6050_MILLI_SCALE);
 }
 
 /**
@@ -246,9 +244,7 @@ static void dal_mpu6050_solve_yaw(double dt)
     }
 
     g_dal_mpu6050_yaw_mdeg += (int64_t)(
-        ((double)(gyro_z_mdps - g_dal_mpu6050_gyro_z_bias_mdps) * dt) +
-        ((gyro_z_mdps >= g_dal_mpu6050_gyro_z_bias_mdps) ?
-            DAL_MPU6050_ROUND_OFFSET : -DAL_MPU6050_ROUND_OFFSET));
+        (double)(gyro_z_mdps - g_dal_mpu6050_gyro_z_bias_mdps) * dt);
     g_dal_mpu6050_yaw_mdeg =
         dal_mpu6050_normalize_yaw(g_dal_mpu6050_yaw_mdeg);
     g_dal_mpu6050_sample.yaw_mdeg = (int32_t)g_dal_mpu6050_yaw_mdeg;

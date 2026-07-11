@@ -8,10 +8,26 @@
 #include "dal_gray.h"
 
 #include <stddef.h>
+#include <stdint.h>
 
-#include "bsp_gpio.h"
+#include "ti_msp_dl_config.h"
 
 /* ======== 可调参数宏定义 ======== */
+
+/* ======== 类型定义 ======== */
+
+/**
+ * @brief 灰度传感器 GPIO 描述。
+ */
+typedef struct {
+    GPIO_Regs *port;       /**< GPIO 端口。 */
+    uint32_t pin;          /**< GPIO pin mask。 */
+} dal_gray_gpio_t;
+
+
+//对外暴露的灰度传感器数据接口
+dal_gray_sample_t g_dal_gray_sample;
+
 
 /* ======== 内部变量 ======== */
 
@@ -27,18 +43,42 @@ static const float g_dal_gray_weights[DAL_GRAY_SENSOR_COUNT] = {
  * 该表与 g_dal_gray_weights[] 使用同一索引：idx=0 对应 D1/bit0，
  * idx=7 对应 D8/bit7，保证 raw_mask、权重和实际 GPIO 一一对应。
  */
-static const bsp_gpio_pin_e g_dal_gray_pins[DAL_GRAY_SENSOR_COUNT] = {
-    BSP_GPIO_GRAY_D1,
-    BSP_GPIO_GRAY_D2,
-    BSP_GPIO_GRAY_D3,
-    BSP_GPIO_GRAY_D4,
-    BSP_GPIO_GRAY_D5,
-    BSP_GPIO_GRAY_D6,
-    BSP_GPIO_GRAY_D7,
-    BSP_GPIO_GRAY_D8
+static const dal_gray_gpio_t g_dal_gray_pins[DAL_GRAY_SENSOR_COUNT] = {
+    {
+        BOARD_GPIO_GRAY_D1_PORT,//GPIOB
+        BOARD_GPIO_GRAY_D1_PIN  //PIN18
+    },
+    {
+        BOARD_GPIO_GRAY_D2_PORT,
+        BOARD_GPIO_GRAY_D2_PIN
+    },
+    {
+        BOARD_GPIO_GRAY_D3_PORT,
+        BOARD_GPIO_GRAY_D3_PIN
+    },
+    {
+        BOARD_GPIO_GRAY_D4_PORT,
+        BOARD_GPIO_GRAY_D4_PIN
+    },
+    {
+        BOARD_GPIO_GRAY_D5_PORT,
+        BOARD_GPIO_GRAY_D5_PIN
+    },
+    {
+        BOARD_GPIO_GRAY_D6_PORT,
+        BOARD_GPIO_GRAY_D6_PIN
+    },
+    {
+        BOARD_GPIO_GRAY_D7_PORT,
+        BOARD_GPIO_GRAY_D7_PIN
+    },
+    {
+        BOARD_GPIO_GRAY_D8_PORT,
+        BOARD_GPIO_GRAY_D8_PIN
+    }
 };
 
-dal_gray_sample_t g_dal_gray_sample;
+
 
 /* ======== 内部函数 ======== */
 
@@ -95,9 +135,13 @@ static uint8_t dal_gray_read_raw(void)
     uint8_t idx;
 
     for (idx = 0U; idx < DAL_GRAY_SENSOR_COUNT; idx++) {
-        bool high = false;
+        const dal_gray_gpio_t *gpio = &g_dal_gray_pins[idx];
 
-        if ((bsp_gpio_read(g_dal_gray_pins[idx], &high) == BSP_OK) && high) {
+        if (DAL_GRAY_ACTIVE_LEVEL_HIGH != 0U) {
+            if ((DL_GPIO_readPins(gpio->port, gpio->pin) & gpio->pin) != 0U) {
+                raw |= (uint8_t)(1U << idx);
+            }
+        } else if ((DL_GPIO_readPins(gpio->port, gpio->pin) & gpio->pin) == 0U) {
             raw |= (uint8_t)(1U << idx);
         }
     }
@@ -109,16 +153,6 @@ static uint8_t dal_gray_read_raw(void)
 
 void dal_gray_init(void)
 {
-    uint8_t idx;
-
-    for (idx = 0U; idx < DAL_GRAY_SENSOR_COUNT; idx++) {
-        /*
-         * WHY: 灰度模块输出线可能在接线或模块未稳定时悬空，上拉和滞回能让
-         * 软件采样获得明确默认电平。
-         */
-        (void)bsp_gpio_init_input(g_dal_gray_pins[idx], BSP_GPIO_PULL_UP, true);
-    }
-
     g_dal_gray_sample.raw_mask = 0U;
     g_dal_gray_sample.active_count = 0U;
     g_dal_gray_sample.line_detected = false;
@@ -133,12 +167,12 @@ void dal_gray_refresh(void)
     uint8_t count;
 
     raw = dal_gray_read_raw();
-    count = dal_gray_count_bits(raw);
+    count = dal_gray_count_bits(raw);//看看灰度传感器有多少置位了
 
-    g_dal_gray_sample.raw_mask = raw;
-    g_dal_gray_sample.active_count = count;
-    g_dal_gray_sample.line_detected = (count != 0U);
-    g_dal_gray_sample.cross_detected = (count >= DAL_GRAY_CROSS_MIN_COUNT);
-    g_dal_gray_sample.position = dal_gray_calc_position(raw, count);
-    g_dal_gray_sample.sequence++;
+    g_dal_gray_sample.raw_mask = raw;//刷新对应置位
+    g_dal_gray_sample.active_count = count;//刷新置位数
+    g_dal_gray_sample.line_detected = (count != 0U);//如果有置位就检测到了线
+    g_dal_gray_sample.cross_detected = (count >= DAL_GRAY_CROSS_MIN_COUNT);//判断是否直角转弯
+    g_dal_gray_sample.position = dal_gray_calc_position(raw, count);//刷新加权数 
+    g_dal_gray_sample.sequence++;//调试用变量
 }

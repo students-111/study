@@ -119,14 +119,15 @@ void app_drive_mode_init(void)
 
 void app_drive_mode_refresh(void)
 {
-    if (g_dal_key_sample[DAL_KEY_KEY1].pressed_edge &&
-        (g_dal_key_sample[DAL_KEY_KEY1].sequence !=
-            g_app_drive_mode_key1_handled_sequence)) {
-        g_app_drive_mode_key1_handled_sequence =
-            g_dal_key_sample[DAL_KEY_KEY1].sequence;
-        app_drive_mode_handle_start_key();
-    }
+//    if (g_dal_key_sample[DAL_KEY_KEY1].pressed_edge &&
+//        (g_dal_key_sample[DAL_KEY_KEY1].sequence !=
+//            g_app_drive_mode_key1_handled_sequence)) {
+//        g_app_drive_mode_key1_handled_sequence =
+//            g_dal_key_sample[DAL_KEY_KEY1].sequence;
+//        app_drive_mode_handle_start_key();
+//    }
 
-    app_drive_mode_update_line_transition();
-    app_drive_mode_refresh_current();
+//    app_drive_mode_update_line_transition();
+//    app_drive_mode_refresh_current();
+	app_line_follow_refresh();
 }

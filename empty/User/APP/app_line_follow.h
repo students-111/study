@@ -10,14 +10,32 @@
 
 /* ======== 可调参数宏定义 ======== */
 
-/* 循迹任务周期，单位 ms；应与速度闭环控制周期保持一致。 */
-#define APP_LINE_FOLLOW_PERIOD_MS      (1ULL)
+/* 循迹任务周期，单位 ms；读取最新编码器测速快照进行速度内环控制。 */
+#define APP_LINE_FOLLOW_PERIOD_MS      (10ULL)
 
-/* 基础目标速度，单位 counts/control-period；高速循迹阶段使用的直线目标速度。 */
-#define APP_LINE_FOLLOW_BASE_SPEED_CP  (14)
+/* 基础目标速度，单位 counts/speed-period；循迹阶段使用。 */
+#define APP_LINE_FOLLOW_BASE_SPEED_CP  (20)
 
-/* PID 浮点输出转整数时的四舍五入补偿。 */
-#define APP_LINE_FOLLOW_ROUND_OFFSET   (0.5f)
+/* PID 调试打印周期，单位 ms；限制串口占用，避免影响循迹控制实时性。 */
+#define APP_LINE_FOLLOW_DEBUG_PRINT_PERIOD_MS  (100U)
+
+/* 循迹环调试量定点倍率；整数值除以 100 还原原始浮点值。 */
+#define APP_LINE_FOLLOW_DEBUG_LINE_SCALE        (100.0f)
+
+/* 速度环调试量定点倍率；整数值除以 10 还原原始浮点值。 */
+#define APP_LINE_FOLLOW_DEBUG_SPEED_SCALE       (10.0f)
+
+/* PID 增益调试量定点倍率；整数值除以 1000000 还原原始浮点值。 */
+#define APP_LINE_FOLLOW_DEBUG_GAIN_SCALE        (1000000.0f)
+
+/* PID 增益简化调试倍率；整数值除以 100 还原原始浮点值。 */
+#define APP_LINE_FOLLOW_DEBUG_GAIN_SIMPLE_SCALE (100.0f)
+
+/* 调试定点整数最大值；异常浮点值会被夹紧到该范围。 */
+#define APP_LINE_FOLLOW_DEBUG_INT_MAX           (32767)
+
+/* 调试定点整数最小值；异常浮点值会被夹紧到该范围。 */
+#define APP_LINE_FOLLOW_DEBUG_INT_MIN           (-32768)
 
 /* ======== 公开 API ======== */
 

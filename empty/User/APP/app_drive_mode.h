@@ -8,10 +8,12 @@
 
 /* ======== include ======== */
 
+#include "app_line_follow.h"
+
 /* ======== 可调参数宏定义 ======== */
 
-/* 行车模式管理任务周期，单位 ms；需与控制外环周期保持一致。 */
-#define APP_DRIVE_MODE_PERIOD_MS       (1ULL)
+/* 行车模式管理任务周期，单位 ms；需与速度闭环控制周期保持一致。 */
+#define APP_DRIVE_MODE_PERIOD_MS       (APP_LINE_FOLLOW_PERIOD_MS)
 
 /* ======== 公开 API ======== */
 

@@ -91,3 +91,6 @@ Keep this managed block so 'trellis update' can refresh the instructions.
 1. 不要选择带内部回环的 UART SysConfig profile 作为调试串口配置；调试 UART 应显式关闭 `enableInternalLoopback`。
 2. 不要在 BSP/DAL 中双写 PWM 周期、UART 分频、I2C timer period 等由 SysConfig 生成的固定数值。
 3. 新增 `.c` 文件后，必须确认 CCS/Debug 构建清单已纳入该源文件，否则命令行构建可能没有链接新模块。
+
+### 更改代码的时候不要更改用户的人话注释 你可以优化 不可以删掉
+

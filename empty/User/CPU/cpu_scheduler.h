@@ -21,14 +21,14 @@
 /* MPU6050 状态机推进周期，单位 ms；需足够快以推进 I2C 异步事务。 */
 #define CPU_TASK_MPU6050_PERIOD_MS             (1ULL)
 
-/* 编码器 GPIO 软件解码采样周期，单位 ms；影响低速计数分辨率。 */
-#define CPU_TASK_ENCODER_SAMPLE_PERIOD_MS      (1ULL)
+/* 编码器测速周期，单位 ms；速度快照单位为 counts/speed-period。 */
+#define CPU_TASK_ENCODER_SPEED_PERIOD_MS       (10ULL)
 
 /* 功能按键消抖采样周期，单位 ms；应小于 APP 模式切换任务周期。 */
 #define CPU_TASK_KEY_PERIOD_MS                 (10ULL)
 
-/* 行车模式任务周期，单位 ms；复用 APP 层模式管理周期。 */
-#define CPU_TASK_DRIVE_MODE_PERIOD_MS          (APP_DRIVE_MODE_PERIOD_MS)
+/* 行车模式管理任务周期，单位 ms；由 APP 模式统一调度直行和循迹。 */
+#define CPU_TASK_APP_DRIVE_MODE_PERIOD_MS      (APP_DRIVE_MODE_PERIOD_MS)
 
 /* ======== 类型定义 ======== */
 
@@ -38,9 +38,10 @@
 typedef enum {
     CPU_TASK_GRAY = 0,              /**< 灰度传感器刷新任务。 */
     CPU_TASK_MPU6050,               /**< MPU6050 状态机刷新任务。 */
-    CPU_TASK_ENCODER_SAMPLE,        /**< 编码器软件解码刷新任务。 */
+    CPU_TASK_ENCODER_SAMPLE,        /**< 编码器中断解码初始化任务。 */
+    CPU_TASK_ENCODER_SPEED,         /**< 编码器测速刷新任务。 */
     CPU_TASK_KEY,                   /**< 功能按键消抖刷新任务。 */
-    CPU_TASK_DRIVE_MODE,            /**< 行车模式管理任务。 */
+    CPU_TASK_APP_DRIVE_MODE,        /**< 行车模式管理任务。 */
     CPU_TASK_COUNT                  /**< CPU 任务数量。 */
 } cpu_task_id_e;
 

@@ -7,7 +7,6 @@
 
 #include "drv_encoder.h"
 
-#include <stdbool.h>
 #include <stddef.h>
 
 /* ======== 可调参数宏定义 ======== */
@@ -32,6 +31,7 @@ static const int8_t g_encoder_transition_table[ENCODER_TRANSITION_COUNT] = {
  * @param phase_a A 相电平。
  * @param phase_b B 相电平。
  * @return 压缩后的 A/B 相状态。
+ * 人话 ：把编码器引脚的四位测速00 01 10 11 变成 0 1 2 3
  */
 static uint8_t Encoder_PackState(bool phase_a, bool phase_b)
 {
@@ -52,37 +52,13 @@ static uint8_t Encoder_PackState(bool phase_a, bool phase_b)
  * @param previous 上一帧 A/B 相压缩状态。
  * @param current 当前 A/B 相压缩状态。
  * @return 正向返回 1，反向返回 -1，无效或未移动返回 0。
+ * 根据压缩过后的2bit位推导出目前是正转还是反转
  */
 static int8_t Encoder_DecodeStep(uint8_t previous, uint8_t current)
 {
     return g_encoder_transition_table[
         ((previous & ENCODER_STATE_MASK) << ENCODER_PREV_SHIFT) |
         (current & ENCODER_STATE_MASK)];
-}
-
-/**
- * @brief 读取编码器 A/B 相状态。
- * @param encoder 编码器实体。
- * @param out_state 输出压缩后的 A/B 相状态。
- * @return 读取成功返回 1，否则返回 0。
- */
-static uint8_t Encoder_ReadState(const Encoder_t *encoder, uint8_t *out_state)
-{
-    bool phase_a = false;
-    bool phase_b = false;
-
-    if ((encoder == NULL) || (out_state == NULL)) {
-        return 0U;
-    }
-    if (bsp_gpio_read(encoder->hw.phase_a_pin, &phase_a) != BSP_OK) {
-        return 0U;
-    }
-    if (bsp_gpio_read(encoder->hw.phase_b_pin, &phase_b) != BSP_OK) {
-        return 0U;
-    }
-
-    *out_state = Encoder_PackState(phase_a, phase_b);
-    return 1U;
 }
 
 /**
@@ -104,14 +80,12 @@ static void Encoder_UpdateState(Encoder_t *encoder, int8_t step)
 
 /* ======== 公开 API ======== */
 
-uint8_t Encoder_Init(Encoder_t *encoder, const EncoderHW_t *hw,
-    uint8_t reverse)
+uint8_t Encoder_Init(Encoder_t *encoder, uint8_t reverse)
 {
-    if ((encoder == NULL) || (hw == NULL)) {
+    if (encoder == NULL) {
         return 0U;
     }
 
-    encoder->hw = *hw;
     encoder->reverse = (reverse != 0U) ? 1U : 0U;
     encoder->enable = 1U;
 
@@ -132,7 +106,7 @@ uint8_t Encoder_Enable(Encoder_t *encoder, uint8_t enable)
     return 1U;
 }
 
-uint8_t Encoder_Update(Encoder_t *encoder)
+uint8_t Encoder_Update(Encoder_t *encoder, bool phase_a, bool phase_b)
 {
     uint8_t current_state;
     int8_t step;
@@ -141,18 +115,13 @@ uint8_t Encoder_Update(Encoder_t *encoder)
         return 0U;
     }
     if (encoder->enable == 0U) {
+        /* 如果编码器已经失能，只刷新本次增量和停止状态。 */
         encoder->delta = 0;
         encoder->state = ENCODER_STATE_STOP;
         return 1U;
     }
 
-    if (!Encoder_ReadState(encoder, &current_state)) {
-        encoder->delta = 0;
-        encoder->state = ENCODER_STATE_ERROR;
-        encoder->sequence++;
-        return 0U;
-    }
-
+    current_state = Encoder_PackState(phase_a, phase_b);
     encoder->raw_state = current_state;
 
     if (encoder->has_state == 0U) {

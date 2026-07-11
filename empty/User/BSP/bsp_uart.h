@@ -140,4 +140,12 @@ void bsp_uart_send_dma(uart_id_e id, uint8_t *data, uint16_t len);
  */
 int bsp_uart_printf(uart_id_e id, const char *format, ...);
 
+/**
+ * @brief 尝试格式化并非阻塞发送 UART 调试文本。
+ * @param id UART 编号。
+ * @param format printf 风格格式字符串。
+ * @return 成功返回发送字节数；串口忙或参数非法返回 -1。
+ */
+int bsp_uart_try_printf(uart_id_e id, const char *format, ...);
+
 #endif /* BSP_UART_H */

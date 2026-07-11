@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>__MSPM0G3507__</Define>
               <Undefine></Undefine>
-              <IncludePath>D:\TI\M0_SDA\mspm0_sdk_2_02_00_05\source\third_party\CMSIS\Core\Include;D:\TI\M0_SDA\mspm0_sdk_2_02_00_05\source;..;../User/APP;../User/DAL;../User/Driver;../User/BSP;../User/CPU;../User/Arithmetic</IncludePath>
+              <IncludePath>D:\TI\M0_SDA\mspm0_sdk_2_02_00_05\source\third_party\CMSIS\Core\Include;D:\TI\M0_SDA\mspm0_sdk_2_02_00_05\source;..;../User/APP;../User/DAL;../User/Driver;../User/BSP;../User/CPU;../User/Arithmetic;../User/Test</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -417,6 +417,31 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>User/CPU</GroupName>
+          <Files>
+            <File>
+              <FileName>cpu_scheduler.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../User/CPU/cpu_scheduler.c</FilePath>
+            </File>
+            <File>
+              <FileName>cpu_scheduler.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>../User/CPU/cpu_scheduler.h</FilePath>
+            </File>
+            <File>
+              <FileName>MultiTimer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../User/CPU/MultiTimer.c</FilePath>
+            </File>
+            <File>
+              <FileName>MultiTimer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>../User/CPU/MultiTimer.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>User/APP</GroupName>
           <Files>
             <File>
@@ -448,31 +473,6 @@
               <FileName>app_straight_drive.h</FileName>
               <FileType>5</FileType>
               <FilePath>../User/APP/app_straight_drive.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>User/Driver</GroupName>
-          <Files>
-            <File>
-              <FileName>drv_encoder.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../User/Driver/drv_encoder.c</FilePath>
-            </File>
-            <File>
-              <FileName>drv_encoder.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../User/Driver/drv_encoder.h</FilePath>
-            </File>
-            <File>
-              <FileName>drv_motor.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../User/Driver/drv_motor.c</FilePath>
-            </File>
-            <File>
-              <FileName>drv_motor.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../User/Driver/drv_motor.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -545,6 +545,16 @@
           <GroupName>User/BSP</GroupName>
           <Files>
             <File>
+              <FileName>bsp_encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../User/BSP/bsp_encoder.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_encoder.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>../User/BSP/bsp_encoder.h</FilePath>
+            </File>
+            <File>
               <FileName>bsp_board.c</FileName>
               <FileType>1</FileType>
               <FilePath>../User/BSP/bsp_board.c</FilePath>
@@ -553,16 +563,6 @@
               <FileName>bsp_board.h</FileName>
               <FileType>5</FileType>
               <FilePath>../User/BSP/bsp_board.h</FilePath>
-            </File>
-            <File>
-              <FileName>bsp_gpio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../User/BSP/bsp_gpio.c</FilePath>
-            </File>
-            <File>
-              <FileName>bsp_gpio.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../User/BSP/bsp_gpio.h</FilePath>
             </File>
             <File>
               <FileName>bsp_i2c.c</FileName>
@@ -612,27 +612,52 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>User/CPU</GroupName>
+          <GroupName>User/Driver</GroupName>
           <Files>
             <File>
-              <FileName>cpu_scheduler.c</FileName>
+              <FileName>drv_encoder.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../User/CPU/cpu_scheduler.c</FilePath>
+              <FilePath>../User/Driver/drv_encoder.c</FilePath>
             </File>
             <File>
-              <FileName>cpu_scheduler.h</FileName>
+              <FileName>drv_encoder.h</FileName>
               <FileType>5</FileType>
-              <FilePath>../User/CPU/cpu_scheduler.h</FilePath>
+              <FilePath>../User/Driver/drv_encoder.h</FilePath>
             </File>
             <File>
-              <FileName>MultiTimer.c</FileName>
+              <FileName>drv_motor.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../User/CPU/MultiTimer.c</FilePath>
+              <FilePath>../User/Driver/drv_motor.c</FilePath>
             </File>
             <File>
-              <FileName>MultiTimer.h</FileName>
+              <FileName>drv_motor.h</FileName>
               <FileType>5</FileType>
-              <FilePath>../User/CPU/MultiTimer.h</FilePath>
+              <FilePath>../User/Driver/drv_motor.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>User/Test</GroupName>
+          <Files>
+            <File>
+              <FileName>test_motor_pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../User/Test/test_motor_pwm.c</FilePath>
+            </File>
+            <File>
+              <FileName>test_motor_pwm.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>../User/Test/test_motor_pwm.h</FilePath>
+            </File>
+            <File>
+              <FileName>test_speed_loop.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../User/Test/test_speed_loop.c</FilePath>
+            </File>
+            <File>
+              <FileName>test_speed_loop.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>../User/Test/test_speed_loop.h</FilePath>
             </File>
           </Files>
         </Group>

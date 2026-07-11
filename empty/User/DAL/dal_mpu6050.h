@@ -100,9 +100,6 @@
 /* 输出整数单位换算比例；单位表示 0.001 工程单位。 */
 #define DAL_MPU6050_MILLI_SCALE                (1000L)
 
-/* 浮点数转换为 0.001 单位整数时的四舍五入补偿。 */
-#define DAL_MPU6050_ROUND_OFFSET               (0.5)
-
 /* 温度公式偏移，单位 0.001 摄氏度。 */
 #define DAL_MPU6050_TEMP_OFFSET_MC             (36530L)
 

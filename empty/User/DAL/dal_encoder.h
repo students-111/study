@@ -11,6 +11,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "../Driver/drv_encoder.h"
+
 /* ======== 可调参数宏定义 ======== */
 
 /* ======== 类型定义 ======== */
@@ -25,23 +27,15 @@ typedef enum {
 } dal_encoder_id_e;
 
 /**
- * @brief 编码器运动方向。
- */
-typedef enum {
-    DAL_ENCODER_DIR_STOP = 0,    /**< 本周期无位移。 */
-    DAL_ENCODER_DIR_FORWARD,     /**< 本周期正向位移。 */
-    DAL_ENCODER_DIR_REVERSE,     /**< 本周期反向位移。 */
-    DAL_ENCODER_DIR_ERROR        /**< BSP 读取失败或状态异常。 */
-} dal_encoder_direction_e;
-
-/**
  * @brief 编码器最新解码样本。
  */
 typedef struct {
     int32_t count;                       /**< 累计编码器计数。 */
     int16_t delta;                       /**< 本次刷新产生的计数增量。 */
-    dal_encoder_direction_e direction;   /**< 本次刷新判定方向。 */
+    int16_t speed_cp;                    /**< 测速周期内计数增量，单位 counts/speed-period。 */
+    EncoderState_t state;                /**< 驱动层编码器状态。 */
     uint8_t raw_state;                   /**< 当前 A/B 相压缩状态。 */
+    bool speed_valid;                    /**< 速度是否已建立上一帧计数基准。 */
     uint32_t sequence;                   /**< 每次刷新递增的样本序号。 */
 } dal_encoder_sample_t;
 
@@ -50,10 +44,11 @@ typedef struct {
 /**
  * @brief 编码器最新快照。
  *
- * `dal_encoder_refresh()` 负责刷新该数组；上层只读，不写。
+ * GPIO 双边沿中断负责刷新计数和状态，`dal_encoder_update_speed()`
+ * 每 10 ms 刷新速度；上层只读，不写。
  * `sequence == 0U` 表示该通道还没有完成过刷新。
  */
-extern dal_encoder_sample_t g_dal_encoder_sample[DAL_ENCODER_COUNT];
+extern volatile dal_encoder_sample_t g_dal_encoder_sample[DAL_ENCODER_COUNT];
 
 /**
  * @brief 初始化编码器解码状态。
@@ -63,11 +58,20 @@ extern dal_encoder_sample_t g_dal_encoder_sample[DAL_ENCODER_COUNT];
 void dal_encoder_init(void);
 
 /**
- * @brief 刷新所有编码器通道的正交解码状态。
+ * @brief 手动刷新所有编码器通道的正交解码状态。
+ *
+ * 正常运行由 GPIO 双边沿中断刷新，此接口仅保留给兼容测试使用。
  * @param void 无参数。
  * @return 无。
  */
 void dal_encoder_refresh(void);
+
+/**
+ * @brief 刷新所有编码器通道的测速快照。
+ * @param void 无参数。
+ * @return 无。
+ */
+void dal_encoder_update_speed(void);
 
 /**
  * @brief 清零指定编码器累计计数和运行状态。

@@ -95,10 +95,18 @@ static cpu_task_slot_t g_cpu_tasks[CPU_TASK_COUNT] = {
     },
     {
         .id = CPU_TASK_ENCODER_SAMPLE,
-        .name = "encoder_sample",
+        .name = "encoder_irq_init",
         .init = dal_encoder_init,
-        .run = dal_encoder_refresh,
-        .period_ms = CPU_TASK_ENCODER_SAMPLE_PERIOD_MS,
+        .run = NULL,
+        .period_ms = 0ULL,
+        .enabled = false,
+    },
+    {
+        .id = CPU_TASK_ENCODER_SPEED,
+        .name = "encoder_speed",
+        .init = NULL,
+        .run = dal_encoder_update_speed,
+        .period_ms = CPU_TASK_ENCODER_SPEED_PERIOD_MS,
         .enabled = true,
     },
     {
@@ -110,11 +118,11 @@ static cpu_task_slot_t g_cpu_tasks[CPU_TASK_COUNT] = {
         .enabled = true,
     },
     {
-        .id = CPU_TASK_DRIVE_MODE,
-        .name = "drive_mode",
+        .id = CPU_TASK_APP_DRIVE_MODE,
+        .name = "app_drive_mode",
         .init = app_drive_mode_init,
         .run = app_drive_mode_refresh,
-        .period_ms = CPU_TASK_DRIVE_MODE_PERIOD_MS,
+        .period_ms = CPU_TASK_APP_DRIVE_MODE_PERIOD_MS,
         .enabled = true,
     },
 };
