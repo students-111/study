@@ -1,21 +1,17 @@
+## #1  task=循迹逻辑正确性评估  phase=RESEARCH
+break-loop: 循迹 PID 天文浮点根因=Keil 主栈仅 0x100 字节且向低地址溢出，覆盖紧邻的 uwTick 与 pid_output；证据=1.35542539e-19 的位型 0x20200538 对应 g_dal_encoder_instances[1]。防复发=链接后核对 map 的 STACK/关键全局布局并保留栈余量，已 promote 至 spec/conventions。
 
-## #1  task=-  phase=-
-break-loop: 循迹无法正常启动 根因=单键模式顺序 STOP->STRAIGHT->LINE_FOLLOW，第一下按键先进入仍在调试的直线模式，用户验收循迹时表现为未启动；证据=OpenOCD/GDB 读到灰度与 MPU 快照有效、按键边沿能命中 app_drive_mode_next；修复=改为 STOP->LINE_FOLLOW->STRAIGHT->STOP；防复发=已 promote 到 spec/conventions。
+## #2  task=循迹赛道第二题闭环行驶方案  phase=INNOVATE
+T-循迹赛道第二题闭环行驶方案：已完成需求收敛。路线采用灰度黑白边沿判点，白底走现有直线保持、弧线走现有循迹；每个边沿停车 1 s，Key1 启动，首版沿用现有速度。下一步：INNOVATE 比较状态机的模块落点与切换保护方案。
 
-## #2  task=继续aemb任务  phase=REVIEW
-review: 已修复 AEMB 门禁脚本 Windows 兼容性问题：PowerShell 入口增加 ExecutionPolicy Bypass，arch-check.ps1 改用兼容 .NET Framework 的相对路径计算，修复 mega-header 正则拼接，并将 empty/User/APP 纳入 APP 层扫描；同步更新 arch-check.sh 的 APP 层目录。验证=python .auto-embedded/scripts/check.py 输出 ARCH/HW/SPEC 全 PASS。构建=当前 PATH 未发现 UV4.exe/ARMCC/ARMCLANG，无法现场重编译；已有 Keil 日志显示 2026-07-09 10:42:57 生成 axf/hex，app_drive_mode.c 已参与编译，0 Error(s), 0 Warning(s)。
+## #3  task=循迹赛道第二题闭环行驶方案  phase=PLAN
+T-循迹赛道第二题闭环行驶方案：INNOVATE 已选定复用 app_drive_mode 的赛道状态机。直线只等待黑线出现，弧线只等待黑线消失；每次确认连续三帧后停车 1 s。已进入 PLAN，实施前仍待用户授权，不改生产代码。
 
-## #3  task=task1循迹启动验证  phase=REVIEW
-runtime: 使用 OpenOCD + arm-none-eabi-gdb 对 empty/keil/Objects/empty_LP_MSPM0G3507_nortos_keil.axf 做 attach-only 运行态检查；OpenOCD 识别 CMSIS-DAPv2、SWD DPIDR=0x6ba02477、Cortex-M0+。GDB 复位运行 1s 后停核，PC 位于 cpu_run 主循环；g_app_drive_mode_current=APP_DRIVE_MODE_STOP，g_dal_gray_sample.sequence=953/raw_mask=249/active_count=6/line_detected=true/position=666，g_dal_key_sample[0].sequence=105/pressed=false/pressed_edge=false，g_dal_mpu6050_sample.sequence=105/yaw_calibrated=true。结论=传感器快照与调度运行有效，task1 原根因“第一下按键进入直线而非循迹”已由代码顺序修正；未做 RAM 写入或函数调用触发，避免车辆误动作。仍需人工按键实测确认第一下进入循迹。
+## #4  task=循迹赛道第二题闭环行驶方案  phase=EXECUTE
+T-循迹赛道第二题闭环行驶方案：已实现 app.[ch] 状态机并接入 scheduler，未使用 app_drive_mode。静态证据：Keil XML 可解析且包含 app.[ch]，本轮补丁 diff --check 通过；未构建原因：环境探测未发现 UV4.exe、ARMCC 或 ARMCLANG。下一步：在具备 Keil 环境的机器编译并上板验证四次暂停。
 
-## #4  task=-  phase=-
-break-loop: 按键后小车无论怎么按都不动 根因=KEY 任务10ms刷新但行车模式1ms刷新，pressed_edge在同一key快照内保持约10ms，被app_drive_mode_refresh重复消费导致模式连续跳转并可能回到STOP；修复=app_drive_mode按g_dal_key_sample[KEY1].sequence记录已消费事件，同一sequence只切换一次；验证=Keil重编译0错误0警告、Keil烧录Verify OK、AEMB门禁全PASS；防复发=已promote到spec/conventions。
+## #5  task=循迹赛道第二题闭环行驶方案  phase=EXECUTE
+T-循迹赛道第二题闭环行驶方案：按 Key 原理图完成硬件迁移。Key1=PB21，内部上拉、低电平按下；GRAY_D2=PB0。已通过 SysConfig CLI 生成并核对宏，check.py --hw 通过。仍待具备 Keil 环境后的编译与上板验证。
 
-## #5  task=降低车轮速度参数  phase=REVIEW
-break-loop: 循迹方向反转，根因=灰度位置左负右正且 PID 已按设定值减输入生成正确符号，APP 又对 PID 输出额外取负；防复发=已 promote 到 spec/conventions，并用左右偏差真值表验证。
-
-## #6  task=编码器gpio双边沿中断解码改造  phase=PLAN
-break-loop: 编码器speed_cp上不去 根因=1ms轮询使10ms窗口最多观测约10count，属于采样时序上限而非PID问题 防复发=已promote到spec/conventions并用双边沿中断替代轮询
-
-## #7  task=编码器gpio双边沿中断解码改造  phase=REVIEW
-break-loop: 循迹打印后右轮不转/无线仍直走 根因=未限速阻塞串口打印+灰度有效电平按高有效解释 防复发=已promote到spec/conventions gotcha
+## #6  task=循迹赛道第二题闭环行驶方案  phase=EXECUTE
+T-循迹赛道第二题闭环行驶方案：已找到并修复 Keil 的 19 个报错。根因是 Key1 迁到 PB21 后所有 BOARD_GPIO 位于 GPIOB，SysConfig 只生成 BOARD_GPIO_PORT；BSP/DAL 已改用该宏。另以 bsp_time_get_ms() 移除 APP 层 extern 时基。E:\\Kill_5\\UV4\\UV4.exe 重建成功（0 error/0 warning），check.py ARCH/HW/SPEC 全通过。下一步上板验证 Key1 低有效与赛道状态机。

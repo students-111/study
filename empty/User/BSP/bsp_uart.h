@@ -35,9 +35,6 @@
 /* UART RX 空闲超时计数；SysConfig/硬件支持 0~15，用于产生一帧接收完成事件。 */
 #define BSP_UART_RX_TIMEOUT_BITS       (15U)
 
-/* bsp_uart_printf 等待上一帧发送完成的最长时间，单位 ms。 */
-#define BSP_UART_PRINTF_TIMEOUT_MS     (50U)
-
 /* UART0 中断优先级；需低于关键总线错误处理，高于普通任务。 */
 #define BSP_UART_IRQ_PRIORITY          (1U)
 
@@ -133,10 +130,10 @@ void bsp_uart_register_error_callback(uart_id_e id, uart_err_callback_t cb);
 void bsp_uart_send_dma(uart_id_e id, uint8_t *data, uint16_t len);
 
 /**
- * @brief 格式化并发送 UART 调试文本。
+ * @brief 格式化并非阻塞发送 UART 调试文本。
  * @param id UART 编号。
  * @param format printf 风格格式字符串。
- * @return 成功返回发送字节数，参数非法或超时返回 -1。
+ * @return 成功返回发送字节数；串口忙、空间不足或参数非法返回 -1。
  */
 int bsp_uart_printf(uart_id_e id, const char *format, ...);
 

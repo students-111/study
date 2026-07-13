@@ -3,19 +3,44 @@
 # 示例条目见注释，正式条目顶格写在各 section 下。
 
 pins:
-  - {id: PB15, func: ENC_M1_A, owner: bsp_encoder}
-  - {id: PB16, func: ENC_M1_B, owner: bsp_encoder}
+  - {id: PA0, func: I2C0_SDA, owner: bsp_i2c}
+  - {id: PA1, func: I2C0_SCL, owner: bsp_i2c}
+  - {id: PA5, func: HFXIN, owner: syscfg_clock}
+  - {id: PA6, func: HFXOUT, owner: syscfg_clock}
+  - {id: PB6, func: TIMG8_CCP0_MOTOR_PWMB, owner: bsp_pwm}
+  - {id: PB7, func: TIMG8_CCP1_MOTOR_PWMA, owner: bsp_pwm}
+  - {id: PB8, func: MOTOR_AIN1, owner: dal_motor}
+  - {id: PB9, func: MOTOR_AIN2, owner: dal_motor}
+  - {id: PA10, func: UART0_TX, owner: bsp_uart}
+  - {id: PA11, func: UART0_RX, owner: bsp_uart}
+  - {id: PB10, func: MOTOR_BIN1, owner: dal_motor}
+  - {id: PB11, func: MOTOR_BIN2, owner: dal_motor}
   - {id: PB12, func: ENC_M2_A, owner: bsp_encoder}
   - {id: PB13, func: ENC_M2_B, owner: bsp_encoder}
-  # - {id: PA9,  func: USART1_TX, owner: bsp_uart}
-  # - {id: PA10, func: USART1_RX, owner: bsp_uart}
+  - {id: PB14, func: MOTOR_STBY, owner: dal_motor}
+  - {id: PB15, func: ENC_M1_A, owner: bsp_encoder}
+  - {id: PB16, func: ENC_M1_B, owner: bsp_encoder}
+  - {id: PB21, func: KEY1, owner: dal_key}
+  - {id: PA19, func: SWDIO, owner: syscfg_debug}
+  - {id: PA20, func: SWCLK, owner: syscfg_debug}
+  - {id: PB20, func: GRAY_D1, owner: dal_gray}
+  - {id: PB0, func: GRAY_D2, owner: dal_gray}
+  - {id: PB22, func: GRAY_D3, owner: dal_gray}
+  - {id: PB23, func: GRAY_D4, owner: dal_gray}
+  - {id: PB24, func: GRAY_D5, owner: dal_gray}
+  - {id: PB25, func: GRAY_D6, owner: dal_gray}
+  - {id: PB26, func: GRAY_D7, owner: dal_gray}
+  - {id: PB27, func: GRAY_D8, owner: dal_gray}
 
 dma:
-  # - {stream: DMA1_CH4, peripheral: USART1_TX, owner: drv_uart_dma}
+  - {stream: DMA_CH0, peripheral: UART0_RX, owner: bsp_uart}
 
 irq:
-  - {irqn: GROUP1_IRQn, priority_preempt: 0, priority_sub: 0, owner: bsp_encoder}
-  # - {irqn: USART1_IRQn, priority_preempt: 1, priority_sub: 0, owner: drv_uart}
+  # NVIC 优先级由 BSP 在运行期设置；相同优先级不代表硬件资源重复，故不在锁表中作为唯一键登记。
+  - {irqn: GPIOB_INT_IRQn, owner: bsp_encoder}
+  - {irqn: I2C0_INT_IRQn, owner: bsp_i2c}
+  - {irqn: UART0_INT_IRQn, owner: bsp_uart}
+  - {irqn: SysTick_IRQn, owner: bsp_time}
 
 timers:
-  # - {id: TIM2, func: 1ms_tick, owner: svc_scheduler}
+  - {id: TIMG8, func: MOTOR_PWM, owner: bsp_pwm}

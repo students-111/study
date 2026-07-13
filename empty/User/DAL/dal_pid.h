@@ -13,13 +13,13 @@
 /* ======== 可调参数宏定义 ======== */
 
 /* 灰度循迹外环比例系数；灰度位置单位约为 -4.0 到 4.0，输出单位为速度差 counts/测速周期。 */
-#define DAL_PID_LINE_KP              (0.0008f)
+#define DAL_PID_LINE_KP              (4.500f)
 
 /* 灰度循迹外环积分系数；循迹外环暂不使用积分，避免低速找线时积分累积。 */
 #define DAL_PID_LINE_KI              (0.0f)
 
 /* 灰度循迹外环微分系数；当前先关闭微分，优先验证比例差速方向。 */
-#define DAL_PID_LINE_KD              (0.0f)
+#define DAL_PID_LINE_KD              (0.00f)
 
 /* 灰度循迹外环输出限幅，单位 counts/测速周期；限制差速不超过基础速度太多。 */
 #define DAL_PID_LINE_OUTPUT_LIMIT    (18.0f)

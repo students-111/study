@@ -24,7 +24,7 @@
                                         1.0f, 2.0f, 3.0f, 4.0f
 
 /* 灰度传感器检测到黑线时的有效电平；0 表示低电平有效，1 表示高电平有效。 */
-#define DAL_GRAY_ACTIVE_LEVEL_HIGH     (0U)
+#define DAL_GRAY_ACTIVE_LEVEL_HIGH     (1U)
 
 /* ======== 类型定义 ======== */
 

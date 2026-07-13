@@ -21,17 +21,17 @@ static const MotorHW_t g_dal_motor_hw[DAL_MOTOR_COUNT] = {
     {
         NULL,
         BSP_PWM_MOTOR_LEFT,
-        BOARD_GPIO_MOTOR_AIN1_PORT,
+        BOARD_GPIO_PORT,
         BOARD_GPIO_MOTOR_AIN1_PIN,
-        BOARD_GPIO_MOTOR_AIN2_PORT,
+        BOARD_GPIO_PORT,
         BOARD_GPIO_MOTOR_AIN2_PIN
     },
     {
         NULL,
         BSP_PWM_MOTOR_RIGHT,
-        BOARD_GPIO_MOTOR_BIN1_PORT,
+        BOARD_GPIO_PORT,
         BOARD_GPIO_MOTOR_BIN1_PIN,
-        BOARD_GPIO_MOTOR_BIN2_PORT,
+        BOARD_GPIO_PORT,
         BOARD_GPIO_MOTOR_BIN2_PIN
     }
 };
@@ -49,7 +49,7 @@ void dal_motor_init(void)
     /* 停止所有电机。 */
     dal_motor_stop_all();
     /* 初始化 STBY 为使能状态。 */
-    DL_GPIO_setPins(BOARD_GPIO_MOTOR_STBY_PORT, BOARD_GPIO_MOTOR_STBY_PIN);
+    DL_GPIO_setPins(BOARD_GPIO_PORT, BOARD_GPIO_MOTOR_STBY_PIN);
     /* 初始化 SysConfig 生成的 PWM 通道。 */
     (void)bsp_pwm_start();
 }

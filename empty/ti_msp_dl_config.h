@@ -73,7 +73,12 @@ extern "C" {
 #define POWER_STARTUP_DELAY                                                (16)
 
 
-#define CPUCLK_FREQ                                                     32000000
+#define GPIO_HFXT_PORT                                                     GPIOA
+#define GPIO_HFXIN_PIN                                             DL_GPIO_PIN_5
+#define GPIO_HFXIN_IOMUX                                         (IOMUX_PINCM10)
+#define GPIO_HFXOUT_PIN                                            DL_GPIO_PIN_6
+#define GPIO_HFXOUT_IOMUX                                        (IOMUX_PINCM11)
+#define CPUCLK_FREQ                                                     80000000
 
 
 
@@ -81,7 +86,7 @@ extern "C" {
 #define MOTOR_PWM_INST                                                     TIMG8
 #define MOTOR_PWM_INST_IRQHandler                               TIMG8_IRQHandler
 #define MOTOR_PWM_INST_INT_IRQN                                 (TIMG8_INT_IRQn)
-#define MOTOR_PWM_INST_CLK_FREQ                                         32000000
+#define MOTOR_PWM_INST_CLK_FREQ                                         40000000
 /* GPIO defines for channel 0 */
 #define GPIO_MOTOR_PWM_C0_PORT                                             GPIOB
 #define GPIO_MOTOR_PWM_C0_PIN                                      DL_GPIO_PIN_6
@@ -115,7 +120,7 @@ extern "C" {
 
 /* Defines for UART_DEBUG */
 #define UART_DEBUG_INST                                                    UART0
-#define UART_DEBUG_INST_FREQUENCY                                       32000000
+#define UART_DEBUG_INST_FREQUENCY                                       40000000
 #define UART_DEBUG_INST_IRQHandler                              UART0_IRQHandler
 #define UART_DEBUG_INST_INT_IRQN                                  UART0_INT_IRQn
 #define GPIO_UART_DEBUG_RX_PORT                                            GPIOA
@@ -127,8 +132,8 @@ extern "C" {
 #define GPIO_UART_DEBUG_IOMUX_RX_FUNC                  IOMUX_PINCM22_PF_UART0_RX
 #define GPIO_UART_DEBUG_IOMUX_TX_FUNC                  IOMUX_PINCM21_PF_UART0_TX
 #define UART_DEBUG_BAUD_RATE                                            (115200)
-#define UART_DEBUG_IBRD_32_MHZ_115200_BAUD                                  (17)
-#define UART_DEBUG_FBRD_32_MHZ_115200_BAUD                                  (23)
+#define UART_DEBUG_IBRD_40_MHZ_115200_BAUD                                  (21)
+#define UART_DEBUG_FBRD_40_MHZ_115200_BAUD                                  (45)
 
 
 
@@ -139,32 +144,29 @@ extern "C" {
 #define UART_DEBUG_INST_DMA_TRIGGER                          (DMA_UART0_RX_TRIG)
 
 
-/* Defines for KEY1: GPIOA.18 with pinCMx 40 on package pin 11 */
-#define BOARD_GPIO_KEY1_PORT                                             (GPIOA)
-#define BOARD_GPIO_KEY1_PIN                                     (DL_GPIO_PIN_18)
-#define BOARD_GPIO_KEY1_IOMUX                                    (IOMUX_PINCM40)
+
+/* Port definition for Pin Group BOARD_GPIO */
+#define BOARD_GPIO_PORT                                                  (GPIOB)
+
+/* Defines for KEY1: GPIOB.21 with pinCMx 49 on package pin 20 */
+#define BOARD_GPIO_KEY1_PIN                                     (DL_GPIO_PIN_21)
+#define BOARD_GPIO_KEY1_IOMUX                                    (IOMUX_PINCM49)
 /* Defines for MOTOR_AIN1: GPIOB.8 with pinCMx 25 on package pin 60 */
-#define BOARD_GPIO_MOTOR_AIN1_PORT                                       (GPIOB)
 #define BOARD_GPIO_MOTOR_AIN1_PIN                                (DL_GPIO_PIN_8)
 #define BOARD_GPIO_MOTOR_AIN1_IOMUX                              (IOMUX_PINCM25)
 /* Defines for MOTOR_AIN2: GPIOB.9 with pinCMx 26 on package pin 61 */
-#define BOARD_GPIO_MOTOR_AIN2_PORT                                       (GPIOB)
 #define BOARD_GPIO_MOTOR_AIN2_PIN                                (DL_GPIO_PIN_9)
 #define BOARD_GPIO_MOTOR_AIN2_IOMUX                              (IOMUX_PINCM26)
 /* Defines for MOTOR_BIN1: GPIOB.10 with pinCMx 27 on package pin 62 */
-#define BOARD_GPIO_MOTOR_BIN1_PORT                                       (GPIOB)
 #define BOARD_GPIO_MOTOR_BIN1_PIN                               (DL_GPIO_PIN_10)
 #define BOARD_GPIO_MOTOR_BIN1_IOMUX                              (IOMUX_PINCM27)
 /* Defines for MOTOR_BIN2: GPIOB.11 with pinCMx 28 on package pin 63 */
-#define BOARD_GPIO_MOTOR_BIN2_PORT                                       (GPIOB)
 #define BOARD_GPIO_MOTOR_BIN2_PIN                               (DL_GPIO_PIN_11)
 #define BOARD_GPIO_MOTOR_BIN2_IOMUX                              (IOMUX_PINCM28)
 /* Defines for MOTOR_STBY: GPIOB.14 with pinCMx 31 on package pin 2 */
-#define BOARD_GPIO_MOTOR_STBY_PORT                                       (GPIOB)
 #define BOARD_GPIO_MOTOR_STBY_PIN                               (DL_GPIO_PIN_14)
 #define BOARD_GPIO_MOTOR_STBY_IOMUX                              (IOMUX_PINCM31)
 /* Defines for ENC_M1_A: GPIOB.15 with pinCMx 32 on package pin 3 */
-#define BOARD_GPIO_ENC_M1_A_PORT                                         (GPIOB)
 // pins affected by this interrupt request:["ENC_M1_A","ENC_M1_B","ENC_M2_A","ENC_M2_B"]
 #define BOARD_GPIO_INT_IRQN                                     (GPIOB_INT_IRQn)
 #define BOARD_GPIO_INT_IIDX                     (DL_INTERRUPT_GROUP1_IIDX_GPIOB)
@@ -172,52 +174,42 @@ extern "C" {
 #define BOARD_GPIO_ENC_M1_A_PIN                                 (DL_GPIO_PIN_15)
 #define BOARD_GPIO_ENC_M1_A_IOMUX                                (IOMUX_PINCM32)
 /* Defines for ENC_M1_B: GPIOB.16 with pinCMx 33 on package pin 4 */
-#define BOARD_GPIO_ENC_M1_B_PORT                                         (GPIOB)
 #define BOARD_GPIO_ENC_M1_B_IIDX                            (DL_GPIO_IIDX_DIO16)
 #define BOARD_GPIO_ENC_M1_B_PIN                                 (DL_GPIO_PIN_16)
 #define BOARD_GPIO_ENC_M1_B_IOMUX                                (IOMUX_PINCM33)
 /* Defines for ENC_M2_A: GPIOB.12 with pinCMx 29 on package pin 64 */
-#define BOARD_GPIO_ENC_M2_A_PORT                                         (GPIOB)
 #define BOARD_GPIO_ENC_M2_A_IIDX                            (DL_GPIO_IIDX_DIO12)
 #define BOARD_GPIO_ENC_M2_A_PIN                                 (DL_GPIO_PIN_12)
 #define BOARD_GPIO_ENC_M2_A_IOMUX                                (IOMUX_PINCM29)
 /* Defines for ENC_M2_B: GPIOB.13 with pinCMx 30 on package pin 1 */
-#define BOARD_GPIO_ENC_M2_B_PORT                                         (GPIOB)
 #define BOARD_GPIO_ENC_M2_B_IIDX                            (DL_GPIO_IIDX_DIO13)
 #define BOARD_GPIO_ENC_M2_B_PIN                                 (DL_GPIO_PIN_13)
 #define BOARD_GPIO_ENC_M2_B_IOMUX                                (IOMUX_PINCM30)
 /* Defines for GRAY_D1: GPIOB.20 with pinCMx 48 on package pin 19 */
-#define BOARD_GPIO_GRAY_D1_PORT                                          (GPIOB)
 #define BOARD_GPIO_GRAY_D1_PIN                                  (DL_GPIO_PIN_20)
 #define BOARD_GPIO_GRAY_D1_IOMUX                                 (IOMUX_PINCM48)
-/* Defines for GRAY_D2: GPIOB.21 with pinCMx 49 on package pin 20 */
-#define BOARD_GPIO_GRAY_D2_PORT                                          (GPIOB)
-#define BOARD_GPIO_GRAY_D2_PIN                                  (DL_GPIO_PIN_21)
-#define BOARD_GPIO_GRAY_D2_IOMUX                                 (IOMUX_PINCM49)
+/* Defines for GRAY_D2: GPIOB.0 with pinCMx 12 on package pin 47 */
+#define BOARD_GPIO_GRAY_D2_PIN                                   (DL_GPIO_PIN_0)
+#define BOARD_GPIO_GRAY_D2_IOMUX                                 (IOMUX_PINCM12)
 /* Defines for GRAY_D3: GPIOB.22 with pinCMx 50 on package pin 21 */
-#define BOARD_GPIO_GRAY_D3_PORT                                          (GPIOB)
 #define BOARD_GPIO_GRAY_D3_PIN                                  (DL_GPIO_PIN_22)
 #define BOARD_GPIO_GRAY_D3_IOMUX                                 (IOMUX_PINCM50)
 /* Defines for GRAY_D4: GPIOB.23 with pinCMx 51 on package pin 22 */
-#define BOARD_GPIO_GRAY_D4_PORT                                          (GPIOB)
 #define BOARD_GPIO_GRAY_D4_PIN                                  (DL_GPIO_PIN_23)
 #define BOARD_GPIO_GRAY_D4_IOMUX                                 (IOMUX_PINCM51)
 /* Defines for GRAY_D5: GPIOB.24 with pinCMx 52 on package pin 23 */
-#define BOARD_GPIO_GRAY_D5_PORT                                          (GPIOB)
 #define BOARD_GPIO_GRAY_D5_PIN                                  (DL_GPIO_PIN_24)
 #define BOARD_GPIO_GRAY_D5_IOMUX                                 (IOMUX_PINCM52)
 /* Defines for GRAY_D6: GPIOB.25 with pinCMx 56 on package pin 27 */
-#define BOARD_GPIO_GRAY_D6_PORT                                          (GPIOB)
 #define BOARD_GPIO_GRAY_D6_PIN                                  (DL_GPIO_PIN_25)
 #define BOARD_GPIO_GRAY_D6_IOMUX                                 (IOMUX_PINCM56)
 /* Defines for GRAY_D7: GPIOB.26 with pinCMx 57 on package pin 28 */
-#define BOARD_GPIO_GRAY_D7_PORT                                          (GPIOB)
 #define BOARD_GPIO_GRAY_D7_PIN                                  (DL_GPIO_PIN_26)
 #define BOARD_GPIO_GRAY_D7_IOMUX                                 (IOMUX_PINCM57)
 /* Defines for GRAY_D8: GPIOB.27 with pinCMx 58 on package pin 29 */
-#define BOARD_GPIO_GRAY_D8_PORT                                          (GPIOB)
 #define BOARD_GPIO_GRAY_D8_PIN                                  (DL_GPIO_PIN_27)
 #define BOARD_GPIO_GRAY_D8_IOMUX                                 (IOMUX_PINCM58)
+
 
 
 /* clang-format on */
@@ -231,6 +223,7 @@ void SYSCFG_DL_I2C_MPU6050_init(void);
 void SYSCFG_DL_UART_DEBUG_init(void);
 void SYSCFG_DL_DMA_init(void);
 
+void SYSCFG_DL_SYSTICK_init(void);
 
 bool SYSCFG_DL_saveConfiguration(void);
 bool SYSCFG_DL_restoreConfiguration(void);

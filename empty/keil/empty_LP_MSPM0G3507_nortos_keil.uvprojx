@@ -72,7 +72,7 @@
           <BeforeMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>D:\TI\M0_SDA\mspm0_sdk_2_02_00_05\tools\keil\syscfg.bat</UserProg1Name>
+            <UserProg1Name>cmd.exe /C "$Psyscfg_keil.bat"</UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
@@ -314,7 +314,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>3</Optim>
+            <Optim>0</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -420,16 +420,6 @@
           <GroupName>User/CPU</GroupName>
           <Files>
             <File>
-              <FileName>cpu_scheduler.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../User/CPU/cpu_scheduler.c</FilePath>
-            </File>
-            <File>
-              <FileName>cpu_scheduler.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../User/CPU/cpu_scheduler.h</FilePath>
-            </File>
-            <File>
               <FileName>MultiTimer.c</FileName>
               <FileType>1</FileType>
               <FilePath>../User/CPU/MultiTimer.c</FilePath>
@@ -439,11 +429,31 @@
               <FileType>5</FileType>
               <FilePath>../User/CPU/MultiTimer.h</FilePath>
             </File>
+            <File>
+              <FileName>scheduler.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\CPU\scheduler.c</FilePath>
+            </File>
+            <File>
+              <FileName>scheduler.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\User\CPU\scheduler.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>User/APP</GroupName>
           <Files>
+            <File>
+              <FileName>app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../User/APP/app.c</FilePath>
+            </File>
+            <File>
+              <FileName>app.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>../User/APP/app.h</FilePath>
+            </File>
             <File>
               <FileName>app_drive_mode.c</FileName>
               <FileType>1</FileType>
@@ -648,6 +658,16 @@
               <FileName>test_motor_pwm.h</FileName>
               <FileType>5</FileType>
               <FilePath>../User/Test/test_motor_pwm.h</FilePath>
+            </File>
+            <File>
+              <FileName>test_gray.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../User/Test/test_gray.c</FilePath>
+            </File>
+            <File>
+              <FileName>test_gray.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>../User/Test/test_gray.h</FilePath>
             </File>
             <File>
               <FileName>test_speed_loop.c</FileName>

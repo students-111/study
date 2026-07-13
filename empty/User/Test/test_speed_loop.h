@@ -12,14 +12,23 @@
 
 /* ======== 可调参数宏定义 ======== */
 
-/* 双轮速度闭环测试周期，单位 ms；读取最新编码器测速快照。 */
-#define TEST_SPEED_LOOP_PERIOD_MS        (20ULL)
+/* 双轮速度闭环测试周期，单位 ms；与测速快照刷新周期保持一致。 */
+#define TEST_SPEED_LOOP_PERIOD_MS                (5U)
 
-/* 左轮目标速度，单位 counts/speed-period；正值表示正转。 */
-#define TEST_SPEED_LOOP_LEFT_TARGET_CP   (6)
+/* 目标速度初始值，单位 counts/speed-period；正值表示正转。 */
+#define TEST_SPEED_LOOP_TARGET_INITIAL_CP        (15)
 
-/* 右轮目标速度，单位 counts/speed-period；正值表示正转。 */
-#define TEST_SPEED_LOOP_RIGHT_TARGET_CP  (6)
+/* FireWater 串口波形帧周期，单位 ms；用于 PID 调参观察。 */
+#define TEST_SPEED_LOOP_FIRE_PERIOD_MS           (5U)
+
+/* 每个阶梯增加的目标速度，单位 counts/speed-period。 */
+#define TEST_SPEED_LOOP_TARGET_STEP_CP           (3)
+
+/* 目标速度上限，单位 counts/speed-period。 */
+#define TEST_SPEED_LOOP_TARGET_MAX_CP            (30)
+
+/* 目标速度阶梯更新周期，单位 ms。 */
+#define TEST_SPEED_LOOP_TARGET_STEP_PERIOD_MS    (500U)
 
 /* ======== 类型定义 ======== */
 
@@ -64,5 +73,22 @@ void test_speed_loop_init(void);
  * @return 无。
  */
 void test_speed_loop_refresh(void);
+
+/**
+ * @brief 以 FireWater 格式发送左右轮速度环 PID 波形数据。
+ *
+ * 通道 a、b、c 分别为左轮设定值、观测值、PID 输出；
+ * 通道 d、e、f 分别为右轮设定值、观测值、PID 输出。
+ * @param void 无参数。
+ * @return 无。
+ */
+void test_speed_loop_fire_refresh(void);
+
+/**
+ * @brief 将双轮速度测试目标恢复为固定设定值。
+ * @param void 无参数。
+ * @return 无。
+ */
+void test_speed_loop_step_target(void);
 
 #endif /* TEST_SPEED_LOOP_H */

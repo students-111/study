@@ -54,6 +54,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     SYSCFG_DL_I2C_MPU6050_init();
     SYSCFG_DL_UART_DEBUG_init();
     SYSCFG_DL_DMA_init();
+    SYSCFG_DL_SYSTICK_init();
 }
 
 
@@ -67,17 +68,22 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_UART_Main_reset(UART_DEBUG_INST);
 
 
+
     DL_GPIO_enablePower(GPIOA);
     DL_GPIO_enablePower(GPIOB);
     DL_TimerG_enablePower(MOTOR_PWM_INST);
     DL_I2C_enablePower(I2C_MPU6050_INST);
     DL_UART_Main_enablePower(UART_DEBUG_INST);
 
+
     delay_cycles(POWER_STARTUP_DELAY);
 }
 
 SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 {
+
+    DL_GPIO_initPeripheralAnalogFunction(GPIO_HFXIN_IOMUX);
+    DL_GPIO_initPeripheralAnalogFunction(GPIO_HFXOUT_IOMUX);
 
     DL_GPIO_initPeripheralOutputFunction(GPIO_MOTOR_PWM_C0_IOMUX,GPIO_MOTOR_PWM_C0_IOMUX_FUNC);
     DL_GPIO_enableOutput(GPIO_MOTOR_PWM_C0_PORT, GPIO_MOTOR_PWM_C0_PIN);
@@ -101,7 +107,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
         GPIO_UART_DEBUG_IOMUX_RX, GPIO_UART_DEBUG_IOMUX_RX_FUNC);
 
     DL_GPIO_initDigitalInputFeatures(BOARD_GPIO_KEY1_IOMUX,
-		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_DOWN,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
 		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
 
     DL_GPIO_initDigitalOutput(BOARD_GPIO_MOTOR_AIN1_IOMUX);
@@ -162,25 +168,25 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
 		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
 
-    DL_GPIO_clearPins(GPIOB, BOARD_GPIO_MOTOR_AIN1_PIN |
+    DL_GPIO_clearPins(BOARD_GPIO_PORT, BOARD_GPIO_MOTOR_AIN1_PIN |
 		BOARD_GPIO_MOTOR_AIN2_PIN |
 		BOARD_GPIO_MOTOR_BIN1_PIN |
 		BOARD_GPIO_MOTOR_BIN2_PIN |
 		BOARD_GPIO_MOTOR_STBY_PIN);
-    DL_GPIO_enableOutput(GPIOB, BOARD_GPIO_MOTOR_AIN1_PIN |
+    DL_GPIO_enableOutput(BOARD_GPIO_PORT, BOARD_GPIO_MOTOR_AIN1_PIN |
 		BOARD_GPIO_MOTOR_AIN2_PIN |
 		BOARD_GPIO_MOTOR_BIN1_PIN |
 		BOARD_GPIO_MOTOR_BIN2_PIN |
 		BOARD_GPIO_MOTOR_STBY_PIN);
-    DL_GPIO_setLowerPinsPolarity(GPIOB, DL_GPIO_PIN_15_EDGE_RISE_FALL |
+    DL_GPIO_setLowerPinsPolarity(BOARD_GPIO_PORT, DL_GPIO_PIN_15_EDGE_RISE_FALL |
 		DL_GPIO_PIN_12_EDGE_RISE_FALL |
 		DL_GPIO_PIN_13_EDGE_RISE_FALL);
-    DL_GPIO_setUpperPinsPolarity(GPIOB, DL_GPIO_PIN_16_EDGE_RISE_FALL);
-    DL_GPIO_clearInterruptStatus(GPIOB, BOARD_GPIO_ENC_M1_A_PIN |
+    DL_GPIO_setUpperPinsPolarity(BOARD_GPIO_PORT, DL_GPIO_PIN_16_EDGE_RISE_FALL);
+    DL_GPIO_clearInterruptStatus(BOARD_GPIO_PORT, BOARD_GPIO_ENC_M1_A_PIN |
 		BOARD_GPIO_ENC_M1_B_PIN |
 		BOARD_GPIO_ENC_M2_A_PIN |
 		BOARD_GPIO_ENC_M2_B_PIN);
-    DL_GPIO_enableInterrupt(GPIOB, BOARD_GPIO_ENC_M1_A_PIN |
+    DL_GPIO_enableInterrupt(BOARD_GPIO_PORT, BOARD_GPIO_ENC_M1_A_PIN |
 		BOARD_GPIO_ENC_M1_B_PIN |
 		BOARD_GPIO_ENC_M2_A_PIN |
 		BOARD_GPIO_ENC_M2_B_PIN);
@@ -188,26 +194,46 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 }
 
 
+static const DL_SYSCTL_SYSPLLConfig gSYSPLLConfig = {
+    .inputFreq              = DL_SYSCTL_SYSPLL_INPUT_FREQ_32_48_MHZ,
+	.rDivClk2x              = 1,
+	.rDivClk1               = 0,
+	.rDivClk0               = 0,
+	.enableCLK2x            = DL_SYSCTL_SYSPLL_CLK2X_DISABLE,
+	.enableCLK1             = DL_SYSCTL_SYSPLL_CLK1_DISABLE,
+	.enableCLK0             = DL_SYSCTL_SYSPLL_CLK0_ENABLE,
+	.sysPLLMCLK             = DL_SYSCTL_SYSPLL_MCLK_CLK0,
+	.sysPLLRef              = DL_SYSCTL_SYSPLL_REF_HFCLK,
+	.qDiv                   = 3,
+	.pDiv                   = DL_SYSCTL_SYSPLL_PDIV_1
+};
 SYSCONFIG_WEAK void SYSCFG_DL_SYSCTL_init(void)
 {
 
 	//Low Power Mode is configured to be SLEEP0
     DL_SYSCTL_setBORThreshold(DL_SYSCTL_BOR_THRESHOLD_LEVEL_0);
+    DL_SYSCTL_setFlashWaitState(DL_SYSCTL_FLASH_WAIT_STATE_2);
 
-    DL_SYSCTL_setSYSOSCFreq(DL_SYSCTL_SYSOSC_FREQ_BASE);
-    /* Set default configuration */
-    DL_SYSCTL_disableHFXT();
-    DL_SYSCTL_disableSYSPLL();
-    DL_SYSCTL_setULPCLKDivider(DL_SYSCTL_ULPCLK_DIV_1);
-    DL_SYSCTL_setMCLKDivider(DL_SYSCTL_MCLK_DIVIDER_DISABLE);
+    
+	DL_SYSCTL_setSYSOSCFreq(DL_SYSCTL_SYSOSC_FREQ_BASE);
+	/* Set default configuration */
+	DL_SYSCTL_disableHFXT();
+	DL_SYSCTL_disableSYSPLL();
+    DL_SYSCTL_setHFCLKSourceHFXTParams(DL_SYSCTL_HFXT_RANGE_32_48_MHZ,100, true);
+    DL_SYSCTL_configSYSPLL((DL_SYSCTL_SYSPLLConfig *) &gSYSPLLConfig);
+    DL_SYSCTL_setULPCLKDivider(DL_SYSCTL_ULPCLK_DIV_2);
+    DL_SYSCTL_enableMFCLK();
+    DL_SYSCTL_enableMFPCLK();
+	DL_SYSCTL_setMFPCLKSource(DL_SYSCTL_MFPCLK_SOURCE_SYSOSC);
+    DL_SYSCTL_setMCLKSource(SYSOSC, HSCLK, DL_SYSCTL_HSCLK_SOURCE_SYSPLL);
 
 }
 
 
 /*
- * Timer clock configuration to be sourced by  / 1 (32000000 Hz)
+ * Timer clock configuration to be sourced by  / 1 (40000000 Hz)
  * timerClkFreq = (timerClkSrc / (timerClkDivRatio * (timerClkPrescale + 1)))
- *   32000000 Hz = 32000000 Hz / (1 * (0 + 1))
+ *   40000000 Hz = 40000000 Hz / (1 * (0 + 1))
  */
 static const DL_TimerG_ClockConfig gMOTOR_PWMClockConfig = {
     .clockSel = DL_TIMER_CLOCK_BUSCLK,
@@ -229,9 +255,6 @@ SYSCONFIG_WEAK void SYSCFG_DL_MOTOR_PWM_init(void) {
 
     DL_TimerG_initPWMMode(
         MOTOR_PWM_INST, (DL_TimerG_PWMConfig *) &gMOTOR_PWMConfig);
-
-    // Set Counter control to the smallest CC index being used
-    DL_TimerG_setCounterControl(MOTOR_PWM_INST,DL_TIMER_CZC_CCCTL0_ZCOND,DL_TIMER_CAC_CCCTL0_ACOND,DL_TIMER_CLC_CCCTL0_LCOND);
 
     DL_TimerG_setCaptureCompareOutCtl(MOTOR_PWM_INST, DL_TIMER_CC_OCTL_INIT_VAL_LOW,
 		DL_TIMER_CC_OCTL_INV_OUT_DISABLED, DL_TIMER_CC_OCTL_SRC_FUNCVAL,
@@ -271,7 +294,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_I2C_MPU6050_init(void) {
     /* Configure Controller Mode */
     DL_I2C_resetControllerTransfer(I2C_MPU6050_INST);
     /* Set frequency to 400000 Hz*/
-    DL_I2C_setTimerPeriod(I2C_MPU6050_INST, 7);
+    DL_I2C_setTimerPeriod(I2C_MPU6050_INST, 9);
     DL_I2C_setControllerTXFIFOThreshold(I2C_MPU6050_INST, DL_I2C_TX_FIFO_LEVEL_BYTES_1);
     DL_I2C_setControllerRXFIFOThreshold(I2C_MPU6050_INST, DL_I2C_RX_FIFO_LEVEL_BYTES_1);
     DL_I2C_enableControllerClockStretching(I2C_MPU6050_INST);
@@ -290,6 +313,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_I2C_MPU6050_init(void) {
 
 
 }
+
 
 static const DL_UART_Main_ClockConfig gUART_DEBUGClockConfig = {
     .clockSel    = DL_UART_MAIN_CLOCK_BUSCLK,
@@ -313,10 +337,10 @@ SYSCONFIG_WEAK void SYSCFG_DL_UART_DEBUG_init(void)
     /*
      * Configure baud rate by setting oversampling and baud rate divisors.
      *  Target baud rate: 115200
-     *  Actual baud rate: 115211.52
+     *  Actual baud rate: 115190.78
      */
     DL_UART_Main_setOversampling(UART_DEBUG_INST, DL_UART_OVERSAMPLING_RATE_16X);
-    DL_UART_Main_setBaudRateDivisor(UART_DEBUG_INST, UART_DEBUG_IBRD_32_MHZ_115200_BAUD, UART_DEBUG_FBRD_32_MHZ_115200_BAUD);
+    DL_UART_Main_setBaudRateDivisor(UART_DEBUG_INST, UART_DEBUG_IBRD_40_MHZ_115200_BAUD, UART_DEBUG_FBRD_40_MHZ_115200_BAUD);
 
 
     /* Configure Interrupts */
@@ -361,4 +385,13 @@ SYSCONFIG_WEAK void SYSCFG_DL_DMA_init(void){
     SYSCFG_DL_DMA_CH0_init();
 }
 
+
+SYSCONFIG_WEAK void SYSCFG_DL_SYSTICK_init(void)
+{
+    /*
+     * Initializes the SysTick period to 1.00 ms,
+     * enables the interrupt, and starts the SysTick Timer
+     */
+    DL_SYSTICK_config(80000);
+}
 

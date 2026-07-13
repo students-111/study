@@ -10,8 +10,8 @@
 
 /* ======== 可调参数宏定义 ======== */
 
-/* 双轮 PWM 测试任务周期，单位 ms；每 10s 递增一次占空比。 */
-#define TEST_MOTOR_PWM_PERIOD_MS             (10000ULL)
+/* 双轮 PWM 测试任务周期，单位 ms；每 5s 递增一次占空比。 */
+#define TEST_MOTOR_PWM_PERIOD_MS             (5000U)
 
 /* 双轮 PWM 测试起始占空比，单位千分比；0 表示从停止开始。 */
 #define TEST_MOTOR_PWM_START_PERMILLE        (0)

@@ -76,7 +76,7 @@ bsp_status_e bsp_encoder_init(bsp_encoder_edge_callback_t callback,
     g_bsp_encoder_edge_callback = callback;
     g_bsp_encoder_callback_context = context;
 
-    DL_GPIO_clearInterruptStatus(BOARD_GPIO_ENC_M1_A_PORT,
+    DL_GPIO_clearInterruptStatus(BOARD_GPIO_PORT,
         BSP_ENCODER_ALL_PIN_MASK);
     NVIC_SetPriority(BOARD_GPIO_INT_IRQN, BSP_ENCODER_IRQ_PRIORITY);
     NVIC_ClearPendingIRQ(BOARD_GPIO_INT_IRQN);
@@ -93,11 +93,11 @@ bsp_status_e bsp_encoder_read_phases(bsp_encoder_channel_e channel,
     }
 
     if (channel == BSP_ENCODER_M1) {
-        bsp_encoder_read_phase_pair(BOARD_GPIO_ENC_M1_A_PORT,
+        bsp_encoder_read_phase_pair(BOARD_GPIO_PORT,
             BOARD_GPIO_ENC_M1_A_PIN, BOARD_GPIO_ENC_M1_B_PIN,
             phase_a, phase_b);
     } else {
-        bsp_encoder_read_phase_pair(BOARD_GPIO_ENC_M2_A_PORT,
+        bsp_encoder_read_phase_pair(BOARD_GPIO_PORT,
             BOARD_GPIO_ENC_M2_A_PIN, BOARD_GPIO_ENC_M2_B_PIN,
             phase_a, phase_b);
     }
@@ -136,13 +136,13 @@ void GROUP1_IRQHandler(void)
     }
 
     pending_pins = DL_GPIO_getEnabledInterruptStatus(
-        BOARD_GPIO_ENC_M1_A_PORT, BSP_ENCODER_ALL_PIN_MASK);
+        BOARD_GPIO_PORT, BSP_ENCODER_ALL_PIN_MASK);
     if (pending_pins == 0U) {
         return;
     }
 
     /* WHY: 先清除本次快照，处理期间到来的新边沿仍可重新挂起中断。 */
-    DL_GPIO_clearInterruptStatus(BOARD_GPIO_ENC_M1_A_PORT, pending_pins);
+    DL_GPIO_clearInterruptStatus(BOARD_GPIO_PORT, pending_pins);
 
     callback = g_bsp_encoder_edge_callback;
     context = g_bsp_encoder_callback_context;

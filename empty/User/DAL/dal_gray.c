@@ -45,35 +45,35 @@ static const float g_dal_gray_weights[DAL_GRAY_SENSOR_COUNT] = {
  */
 static const dal_gray_gpio_t g_dal_gray_pins[DAL_GRAY_SENSOR_COUNT] = {
     {
-        BOARD_GPIO_GRAY_D1_PORT,//GPIOB
+        BOARD_GPIO_PORT,//GPIOB
         BOARD_GPIO_GRAY_D1_PIN  //PIN18
     },
     {
-        BOARD_GPIO_GRAY_D2_PORT,
+        BOARD_GPIO_PORT,
         BOARD_GPIO_GRAY_D2_PIN
     },
     {
-        BOARD_GPIO_GRAY_D3_PORT,
+        BOARD_GPIO_PORT,
         BOARD_GPIO_GRAY_D3_PIN
     },
     {
-        BOARD_GPIO_GRAY_D4_PORT,
+        BOARD_GPIO_PORT,
         BOARD_GPIO_GRAY_D4_PIN
     },
     {
-        BOARD_GPIO_GRAY_D5_PORT,
+        BOARD_GPIO_PORT,
         BOARD_GPIO_GRAY_D5_PIN
     },
     {
-        BOARD_GPIO_GRAY_D6_PORT,
+        BOARD_GPIO_PORT,
         BOARD_GPIO_GRAY_D6_PIN
     },
     {
-        BOARD_GPIO_GRAY_D7_PORT,
+        BOARD_GPIO_PORT,
         BOARD_GPIO_GRAY_D7_PIN
     },
     {
-        BOARD_GPIO_GRAY_D8_PORT,
+        BOARD_GPIO_PORT,
         BOARD_GPIO_GRAY_D8_PIN
     }
 };

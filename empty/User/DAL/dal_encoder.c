@@ -182,7 +182,7 @@ void dal_encoder_refresh(void)
 
 
 
-/* 每 10 ms 刷新速度。 */
+/* 按当前测速周期刷新速度。 */
 void dal_encoder_update_speed(void)
 {
     unsigned int idx;

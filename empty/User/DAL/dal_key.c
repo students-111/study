@@ -35,9 +35,9 @@ dal_key_sample_t g_dal_key_sample[DAL_KEY_COUNT];
 /* ======== 内部变量 ======== */
 
 static dal_key_channel_t g_dal_key1_channel = {
-    .port = BOARD_GPIO_KEY1_PORT,
+    .port = BOARD_GPIO_PORT,
     .pin = BOARD_GPIO_KEY1_PIN,
-    .active_high = true,
+    .active_high = false,
 };
 
 /* ======== 内部函数 ======== */

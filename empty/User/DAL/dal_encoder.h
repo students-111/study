@@ -45,7 +45,7 @@ typedef struct {
  * @brief 编码器最新快照。
  *
  * GPIO 双边沿中断负责刷新计数和状态，`dal_encoder_update_speed()`
- * 每 10 ms 刷新速度；上层只读，不写。
+ * 由 CPU 周期调度器按测速周期刷新速度；上层只读，不写。
  * `sequence == 0U` 表示该通道还没有完成过刷新。
  */
 extern volatile dal_encoder_sample_t g_dal_encoder_sample[DAL_ENCODER_COUNT];

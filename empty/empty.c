@@ -5,7 +5,7 @@
 
 /* ======== include ======== */
 
-#include "cpu_scheduler.h"
+#include "scheduler.h"
 
 /* ======== 可调参数宏定义 ======== */
 
@@ -13,8 +13,8 @@
 
 int main(void)
 {
-    cpu_init();
-    cpu_run();
+    scheduler_init();
+    scheduler_run();
 }
 
 

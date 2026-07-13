@@ -82,7 +82,7 @@ Project/
 
 不要手工修改生成文件，例如 `Debug/ti_msp_dl_config.c`、`Debug/ti_msp_dl_config.h`、CubeMX 生成的初始化代码。修改硬件配置后，通过对应工具重新生成。
 
-BSP 可以包含厂商生成头文件并引用生成宏。DAL/Driver 在处理简单板级 GPIO 时也可以包含厂商生成头文件，并直接调用 `DL_GPIO_readPins()`、`DL_GPIO_setPins()`、`DL_GPIO_clearPins()` 这类无状态 GPIO 读写 API。APP 不应包含这些生成头文件，也不应直接调用底层 DriverLib/HAL/LL API。
+BSP 可以包含厂商生成头文件并引用生成宏。DAL/Driver 在处理简单板级 GPIO 时也可以包含厂商生成头文件，并直接调用 `DL_GPIO_readPins()`、`DL_GPIO_setPins()`、`DL_GPIO_clearPins()` 这类无状态 GPIO 读写 API。应以当前 SysConfig 实际生成形式为准：跨端口引脚组可使用各功能的 `BOARD_GPIO_<功能>_PORT`，同一端口引脚组应使用组级 `BOARD_GPIO_PORT` 配合各功能的 `BOARD_GPIO_<功能>_PIN`；不得为兼容旧代码手工补写端口宏。APP 不应包含这些生成头文件，也不应直接调用底层 DriverLib/HAL/LL API。
 
 ## BSP 风格
 
@@ -146,6 +146,8 @@ APP 只做策略，不做硬件采样和底层控制细节。
 
 ## CPU 调度风格
 
+当前工程的裸机周期任务统一由 `User/CPU/scheduler.[ch]` 管理。调度器以 SysTick 毫秒计数 `uwTick` 为唯一时基：`scheduler_init()` 依次完成 SysConfig、BSP 和 DAL/APP 初始化，`scheduler_run()` 在主循环中按周期调用非阻塞任务并在空闲时进入 `bsp_board_idle()`。不得重新引入 `cpu_scheduler` 或 MultiTimer 作为并行调度入口。
+
 CPU 层负责裸机协作式任务调度。若项目使用 RTOS，则 CPU 层可替换为系统任务创建和调度入口，但职责仍然是“系统组织”，不是业务策略。
 
 推荐初始化顺序：
@@ -161,6 +163,7 @@ CPU 层负责裸机协作式任务调度。若项目使用 RTOS，则 CPU 层可
 - ISR 只做短小数据搬运或状态更新。
 - ISR 不做日志、不做复杂策略、不做长时间循环等待。
 - 传感器刷新、按键刷新、速度闭环等作为独立周期任务运行。
+- 执行单项 Test 时，CPU 调度器只登记该测试及其必需的基础任务；凡是会写入同一执行器的 APP/DAL 控制任务必须停用，防止覆盖测试输出。
 
 ## C 代码格式
 
@@ -245,7 +248,7 @@ CPU 层负责裸机协作式任务调度。若项目使用 RTOS，则 CPU 层可
 - 每个 `.c` 顶部先看宏和类型，就能知道这个模块的可调项和状态结构。
 - 复杂表驱动必须解释索引含义，例如灰度权重表、编码器转移表。
 - APP 的函数名体现业务动作，DAL 的函数名体现设备动作，BSP 的函数名体现外设动作。
-- 临时测试代码放 `User/Test/`，验证完删除或明确标注，不混入生产任务表。
+- 临时测试代码放 `User/Test/`，验证完删除或明确标注；测试启用时由 CPU 调度器显式接管测试任务表，不与生产控制任务并行写同一执行器。
 
 ## 不要做的事
 

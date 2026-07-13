@@ -1,0 +1,115 @@
+TC3C8 000:010.520   SEGGER J-Link V9.56 Log File
+TC3C8 000:011.190   DLL Compiled: Jul  1 2026 16:46:42
+TC3C8 000:011.196   Logging started @ 2026-07-12 12:57
+TC3C8 000:011.200   Process: E:\Kill_5\UV4\UV4.exe
+TC3C8 000:011.625 - 11.204ms 
+TC3C8 000:011.786 JLINK_SetWarnOutHandler(...)
+TC3C8 000:011.798 - 0.158ms 
+TC3C8 000:011.812 JLINK_OpenEx(...)
+TC3C8 000:017.726   Firmware: J-Link V9 compiled Dec 13 2022 11:14:50
+TC3C8 000:018.926   Firmware: J-Link V9 compiled Dec 13 2022 11:14:50
+TC3C8 000:019.589   Decompressing FW timestamp took 286 us
+TC3C8 000:026.060   Hardware: V9.70
+TC3C8 000:026.074   S/N: 69730347
+TC3C8 000:026.079   OEM: SEGGER
+TC3C8 000:026.085   Feature(s): RDI, GDB, FlashDL, FlashBP, JFlash
+TC3C8 000:027.172   Bootloader: (FW returned invalid version)
+TC3C8 000:028.143   EMU: Cleaned up zombie connection 1. PID: 0x239C (9116)
+TC3C8 000:029.240   TELNET listener socket opened on port 19021
+TC3C8 000:029.500   WEBSRV WEBSRV_Init(): Starting webserver thread(s)
+TC3C8 000:029.697   WEBSRV Webserver running on local port 19080
+TC3C8 000:029.798   Looking for J-Link GUI Server exe at: E:\Kill_5\ARM\Segger\JLinkGUIServer.exe
+TC3C8 000:029.879   Looking for J-Link GUI Server exe at: C:\Program Files\SEGGER\JLink_V956\JLinkGUIServer.exe
+TC3C8 000:029.941   Forking J-Link GUI Server: C:\Program Files\SEGGER\JLink_V956\JLinkGUIServer.exe
+TC3C8 000:185.863   J-Link GUI Server info: "J-Link GUI server V9.56 "
+TC3C8 000:195.780 - 183.560ms returns "O.K."
+TC3C8 000:195.837 JLINK_GetEmuCaps()
+TC3C8 000:195.846 - 0.009ms returns 0xB9FF7BBF
+TC3C8 000:195.854 JLINK_TIF_GetAvailable(...)
+TC3C8 000:196.096 - 0.243ms 
+TC3C8 000:196.105 JLINK_SetErrorOutHandler(...)
+TC3C8 000:196.109 - 0.004ms 
+TC3C8 000:196.534 JLINK_ExecCommand("ProjectFile = "C:\Users\cheng\Desktop\24-H\24_HUser\empty\keil\JLinkSettings.ini"", ...). 
+TC3C8 000:236.714   Ref file found at: E:\Kill_5\ARM\Segger\JLinkDevices.ref
+TC3C8 000:236.831   REF file references invalid XML file: C:\Program Files\SEGGER\JLink_V956\JLinkDevices.xml
+TC3C8 000:237.339 - 40.807ms returns 0x00
+TC3C8 000:240.370 JLINK_ExecCommand("Device = MSPM0G3507", ...). 
+TC3C8 000:250.146   Device "MSPM0G3507" selected.
+TC3C8 000:250.445 - 10.074ms returns 0x00
+TC3C8 000:250.711   ERROR: Unknown command
+TC3C8 000:250.734 JLINK_GetHardwareVersion()
+TC3C8 000:250.906 - 0.005ms returns 97000
+TC3C8 000:250.914 JLINK_GetDLLVersion()
+TC3C8 000:250.919 - 0.004ms returns 95600
+TC3C8 000:251.107 JLINK_GetOEMString(...)
+TC3C8 000:251.122 JLINK_GetFirmwareString(...)
+TC3C8 000:251.129 - 0.006ms 
+TC3C8 000:261.399 JLINK_GetDLLVersion()
+TC3C8 000:261.435 - 0.035ms returns 95600
+TC3C8 000:261.442 JLINK_GetCompileDateTime()
+TC3C8 000:261.446 - 0.004ms 
+TC3C8 000:264.901 JLINK_GetFirmwareString(...)
+TC3C8 000:264.936 - 0.032ms 
+TC3C8 000:268.058 JLINK_GetHardwareVersion()
+TC3C8 000:268.083 - 0.031ms returns 97000
+TC3C8 000:270.630 JLINK_GetSN()
+TC3C8 000:270.651 - 0.021ms returns 69730347
+TC3C8 000:272.719 JLINK_GetOEMString(...)
+TC3C8 000:279.607 JLINK_TIF_Select(JLINKARM_TIF_SWD)
+TC3C8 000:280.962 - 1.353ms returns 0x00
+TC3C8 000:280.983 JLINK_HasError()
+TC3C8 000:280.999 JLINK_SetSpeed(5000)
+TC3C8 000:281.321 - 0.325ms 
+TC3C8 000:281.335 JLINK_GetId()
+TC3C8 000:285.851   InitTarget() start
+TC3C8 000:286.171    J-Link Script File: Executing InitTarget()
+TC3C8 000:390.012   Error: Failed to initialize DAP.
+TC3C8 000:394.447   Could not connect to MSPM0 device.
+For debugger connection the device needs a mass erase.
+Note: This will erase the entire device and user data.
+TC3C8 000:398.261   Executing default behavior previously saved in the registry.
+TC3C8 000:404.216   Device will be unsecured now.
+TC3C8 000:408.626   Can not attach to CPU. Performing mass erase
+TC3C8 000:453.090   Could not send mass erase command
+TC3C8 000:455.532   Mass erase failed.
+TC3C8 000:458.112   Could not connect to MSPM0 device.
+For debugger connection the device needs a factory reset.
+Note: This will erase the entire device and user data and reset the NONMAIN section to factory defaults.
+TC3C8 000:463.042   Executing default behavior previously saved in the registry.
+TC3C8 000:467.035   Device will be unsecured now.
+TC3C8 000:471.266   Can not attach to CPU. Performing factory reset
+TC3C8 000:513.227   Could not send factory reset command
+TC3C8 000:515.269   Factory reset failed.
+TC3C8 000:515.290   
+  ***** Error: 
+TC3C8 000:515.295   J-Link script file function InitTarget() returned with error code -1
+TC3C8 000:517.212   InitTarget() end - Took 229ms
+TC3C8 000:519.165   Connect failed. Resetting via Reset pin and trying again.
+TC3C8 000:584.684   InitTarget() start
+TC3C8 000:584.710    J-Link Script File: Executing InitTarget()
+TC3C8 000:589.057   Error: Failed to initialize DAP.
+TC3C8 000:592.209   Could not connect to MSPM0 device.
+For debugger connection the device needs a mass erase.
+Note: This will erase the entire device and user data.
+TC3C8 000:595.855   Executing default behavior previously saved in the registry.
+TC3C8 000:600.273   Device will be unsecured now.
+TC3C8 000:602.934   Can not attach to CPU. Performing mass erase
+TC3C8 000:647.679   Could not send mass erase command
+TC3C8 000:652.972   Mass erase failed.
+TC3C8 000:655.925   Could not connect to MSPM0 device.
+For debugger connection the device needs a factory reset.
+Note: This will erase the entire device and user data and reset the NONMAIN section to factory defaults.
+TC3C8 000:658.688   Executing default behavior previously saved in the registry.
+TC3C8 000:663.142   Device will be unsecured now.
+TC3C8 000:666.746   Can not attach to CPU. Performing factory reset
+TC3C8 000:710.853   Could not send factory reset command
+TC3C8 000:714.790   Factory reset failed.
+TC3C8 000:714.832   
+  ***** Error: 
+TC3C8 000:714.837   J-Link script file function InitTarget() returned with error code -1
+TC3C8 000:717.930   InitTarget() end - Took 130ms
+TC3C8 000:717.968 - 436.632ms returns 0x00000000
+TC3C8 002:428.856 JLINK_Close()
+TC3C8 002:441.348 - 12.491ms
+TC3C8 002:441.380   
+TC3C8 002:441.384   Closed

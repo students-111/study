@@ -9,7 +9,6 @@
 
 #include <stdbool.h>
 
-#include "bsp_time.h"
 #include "ringbuffer.h"
 #include "ti_msp_dl_config.h"
 
@@ -366,18 +365,12 @@ int bsp_uart_printf(uart_id_e id, const char *format, ...)
 {
     va_list ap;
     int len;
-    uint32_t tickstart;
 
     if (!bsp_uart_is_valid_id(id) || (format == NULL)) {
         return -1;
     }
-
-    tickstart = bsp_time_get_ms();
-    while (bsp_uart_pending() != 0U) {
-        if ((uint32_t)(bsp_time_get_ms() - tickstart) >
-            BSP_UART_PRINTF_TIMEOUT_MS) {
-            return -1;
-        }
+    if (bsp_uart_pending() != 0U) {
+        return -1;
     }
 
     va_start(ap, format);
@@ -393,8 +386,8 @@ int bsp_uart_printf(uart_id_e id, const char *format, ...)
         len = (int)(BSP_UART_PRINTF_BUF_SIZE - 1U);
     }
 
-    bsp_uart_send_dma(id, g_bsp_uart_printf_buf, (uint16_t)len);
-    return len;
+    return (bsp_uart_write_async(g_bsp_uart_printf_buf,
+        (size_t)len) == BSP_OK) ? len : -1;
 }
 
 int bsp_uart_try_printf(uart_id_e id, const char *format, ...)

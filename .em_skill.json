@@ -1,0 +1,6 @@
+{
+  "tools": {
+    "jlink": "C:\\Program Files\\SEGGER\\JLink_V956\\JLink.exe",
+    "jlink-gdbserver": "C:\\Program Files\\SEGGER\\JLink_V956\\JLinkGDBServerCL.exe"
+  }
+}

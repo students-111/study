@@ -1,15 +1,11 @@
-# 自动探测结果（草案，待人工确认）
+# 硬件识别记录
 
-> 由 `aemb init` 扫描工程文件名/扩展名推断，**可能误判**。
-> 确认无误后，请把相关信息手工并入 `index.md` 与 `hw-lock.yaml`，再删除本文件。
+> 已人工核对 SysConfig 配置；不采用文件名索引产生的 ESP32-Arduino 误判。
 
-- 疑似芯片: MSPM0G3507, MSPM0G350X
-- 构建系统: Makefile, IAR EWARM, Keil MDK, 固件产物(.hex)
+- 芯片：MSPM0G3507，LQFP-64（PM）封装。
+- SDK：mspm0_sdk@2.02.00.05。
 
 ## 证据
-- MSPM0G3507 ← empty_LP_MSPM0G3507_nortos_gcc.projectspec
-- Makefile ← makefile
-- IAR EWARM ← empty_LP_MSPM0G3507_nortos_iar.ewp
-- MSPM0G350X ← startup_mspm0g350x_iar.c
-- Keil MDK ← empty_LP_MSPM0G3507_nortos_keil.uvprojx
-- 固件产物(.hex) ← empty_LP_MSPM0G3507_nortos_keil.hex
+
+- `empty/empty.syscfg` 的 `@v2CliArgs` 指定 `--device "MSPM0G3507"`。
+- `empty/empty.syscfg` 指定 80 MHz 系统时钟、I2C0、UART0、TIMG8 和 DMA_CH0。

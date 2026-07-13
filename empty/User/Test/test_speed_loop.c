@@ -11,6 +11,7 @@
 #include <stdint.h>
 
 #include "PID.h"
+#include "bsp_uart.h"
 #include "dal_encoder.h"
 #include "dal_motor.h"
 #include "dal_pid.h"
@@ -18,6 +19,10 @@
 /* ======== 全局实例 ======== */
 
 test_speed_loop_sample_t g_test_speed_loop_sample;
+
+/* ======== 内部变量 ======== */
+
+static int16_t g_test_speed_loop_target_cp;
 
 /* ======== 内部函数 ======== */
 
@@ -56,13 +61,14 @@ static int16_t test_speed_loop_pid_to_permille(float value)
  */
 static void test_speed_loop_reset_runtime(void)
 {
+    g_test_speed_loop_target_cp = (int16_t)TEST_SPEED_LOOP_TARGET_INITIAL_CP;
     g_test_speed_loop_sample.left.target_cp =
-        (int16_t)TEST_SPEED_LOOP_LEFT_TARGET_CP;
+        g_test_speed_loop_target_cp;
     g_test_speed_loop_sample.left.measured_cp = 0;
     g_test_speed_loop_sample.left.output_permille = 0;
     g_test_speed_loop_sample.left.valid = 0U;
     g_test_speed_loop_sample.right.target_cp =
-        (int16_t)TEST_SPEED_LOOP_RIGHT_TARGET_CP;
+        g_test_speed_loop_target_cp;
     g_test_speed_loop_sample.right.measured_cp = 0;
     g_test_speed_loop_sample.right.output_permille = 0;
     g_test_speed_loop_sample.right.valid = 0U;
@@ -127,11 +133,11 @@ void test_speed_loop_refresh(void)
 
     g_test_speed_loop_sample.sequence++;
     g_test_speed_loop_sample.left.target_cp =
-        (int16_t)TEST_SPEED_LOOP_LEFT_TARGET_CP;
+        g_test_speed_loop_target_cp;
     g_test_speed_loop_sample.left.measured_cp = left_measured_cp;
     g_test_speed_loop_sample.left.valid = left_valid ? 1U : 0U;
     g_test_speed_loop_sample.right.target_cp =
-        (int16_t)TEST_SPEED_LOOP_RIGHT_TARGET_CP;
+        g_test_speed_loop_target_cp;
     g_test_speed_loop_sample.right.measured_cp = right_measured_cp;
     g_test_speed_loop_sample.right.valid = right_valid ? 1U : 0U;
 
@@ -143,9 +149,26 @@ void test_speed_loop_refresh(void)
     }
 
     test_speed_loop_apply_wheel(DAL_PID_ID_SPEED_LEFT, DAL_MOTOR_LEFT,
-        (int16_t)TEST_SPEED_LOOP_LEFT_TARGET_CP, left_measured_cp,
+        g_test_speed_loop_target_cp, left_measured_cp,
         &g_test_speed_loop_sample.left);
     test_speed_loop_apply_wheel(DAL_PID_ID_SPEED_RIGHT, DAL_MOTOR_RIGHT,
-        (int16_t)TEST_SPEED_LOOP_RIGHT_TARGET_CP, right_measured_cp,
+        g_test_speed_loop_target_cp, right_measured_cp,
         &g_test_speed_loop_sample.right);
+}
+
+void test_speed_loop_fire_refresh(void)
+{
+    (void)bsp_uart_try_printf(UART_ID_UART0,
+        "a:%d,b:%d,c:%d,d:%d,e:%d,f:%d\r\n",
+        (int)g_test_speed_loop_sample.left.target_cp,
+        (int)g_test_speed_loop_sample.left.measured_cp,
+        (int)g_test_speed_loop_sample.left.output_permille,
+        (int)g_test_speed_loop_sample.right.target_cp,
+        (int)g_test_speed_loop_sample.right.measured_cp,
+        (int)g_test_speed_loop_sample.right.output_permille);
+}
+
+void test_speed_loop_step_target(void)
+{
+    g_test_speed_loop_target_cp = (int16_t)TEST_SPEED_LOOP_TARGET_INITIAL_CP;
 }
