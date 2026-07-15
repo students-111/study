@@ -207,6 +207,66 @@ static const DL_SYSCTL_SYSPLLConfig gSYSPLLConfig = {
 	.qDiv                   = 3,
 	.pDiv                   = DL_SYSCTL_SYSPLL_PDIV_1
 };
+
+SYSCONFIG_WEAK bool SYSCFG_DL_SYSCTL_SYSPLL_init(void)
+{
+    bool fFCCRatioStatus = false;
+    uint32_t fFCCSysoscCount;
+    uint32_t fFCCPllCount;
+    uint32_t fFCCRatio;
+    uint32_t fccTimeOutCounter;
+
+    DL_SYSCTL_setFCCPeriods( DL_SYSCTL_FCC_TRIG_CNT_01 );
+
+    /* Measuring PLL. */
+    DL_SYSCTL_configFCC(DL_SYSCTL_FCC_TRIG_TYPE_RISE_RISE,
+                        DL_SYSCTL_FCC_TRIG_SOURCE_LFCLK,
+                        DL_SYSCTL_FCC_CLOCK_SOURCE_SYSPLLCLK0);
+    /* Get SYSPLL frequency using FCC */
+    fccTimeOutCounter = 0;
+    DL_SYSCTL_startFCC();
+    while (DL_SYSCTL_isFCCDone() == 0) {
+        delay_cycles(977);  /* 1x LFCLK cycle = 32MHz/32.768kHz = 977, 30.5us */
+        fccTimeOutCounter++;
+        if(fccTimeOutCounter > 65){
+            /* Timeout set to approximately 2ms (user-customizable) */
+            break;
+        }
+    }
+
+    /* get measA= SYSPLLCLK0 freq wrt LFOSC*/
+    fFCCPllCount = DL_SYSCTL_readFCC();
+
+    /* Measuring SYSPLL Source */
+    DL_SYSCTL_configFCC(DL_SYSCTL_FCC_TRIG_TYPE_RISE_RISE,
+                        DL_SYSCTL_FCC_TRIG_SOURCE_LFCLK,
+                        DL_SYSCTL_FCC_CLOCK_SOURCE_HFCLK);
+    /* Get SYSPLL frequency using FCC */
+    fccTimeOutCounter = 0;
+    DL_SYSCTL_startFCC();
+    while (DL_SYSCTL_isFCCDone() == 0) {
+        delay_cycles(977);  /* 1x LFCLK cycle = 32MHz/32.768kHz = 977, 30.5us */
+        fccTimeOutCounter++;
+        if(fccTimeOutCounter > 65){
+            /* Timeout set to approximately 2ms (user-customizable) */
+            break;
+        }
+    }
+
+    /* get measB= SYSOSC freq wrt LFOSC*/
+    fFCCSysoscCount = DL_SYSCTL_readFCC();
+
+    /* Get ratio of both measurements*/
+    fFCCRatio = (fFCCPllCount * FLOAT_TO_INT_SCALE) / fFCCSysoscCount;
+    /* Check ratio is within bounds*/
+    if ((FCC_LOWER_BOUND <  fFCCRatio) && (fFCCRatio < FCC_UPPER_BOUND))
+    {
+        /* ratio is good for proceeding into application code. */
+        fFCCRatioStatus = true;
+    }
+
+    return fFCCRatioStatus;
+}
 SYSCONFIG_WEAK void SYSCFG_DL_SYSCTL_init(void)
 {
 
@@ -221,6 +281,24 @@ SYSCONFIG_WEAK void SYSCFG_DL_SYSCTL_init(void)
 	DL_SYSCTL_disableSYSPLL();
     DL_SYSCTL_setHFCLKSourceHFXTParams(DL_SYSCTL_HFXT_RANGE_32_48_MHZ,100, true);
     DL_SYSCTL_configSYSPLL((DL_SYSCTL_SYSPLLConfig *) &gSYSPLLConfig);
+
+    /*
+     * [SYSPLL_ERR_01]
+     * PLL Incorrect locking WA start.
+     * Insert after every PLL enable.
+     * This can lead an infinite loop if the condition persists
+     * and can block entry to the application code.
+     */
+
+    while (SYSCFG_DL_SYSCTL_SYSPLL_init() == false)
+    {
+        /* Toggle SYSPLL enable to re-enable SYSPLL and re-check incorrect locking */
+        DL_SYSCTL_disableSYSPLL();
+        DL_SYSCTL_enableSYSPLL();
+
+        /* Wait until SYSPLL startup is stabilized*/
+        while ((DL_SYSCTL_getClockStatus() & SYSCTL_CLKSTATUS_SYSPLLGOOD_MASK) != DL_SYSCTL_CLK_STATUS_SYSPLL_GOOD){}
+    }
     DL_SYSCTL_setULPCLKDivider(DL_SYSCTL_ULPCLK_DIV_2);
     DL_SYSCTL_enableMFCLK();
     DL_SYSCTL_enableMFPCLK();
@@ -255,6 +333,9 @@ SYSCONFIG_WEAK void SYSCFG_DL_MOTOR_PWM_init(void) {
 
     DL_TimerG_initPWMMode(
         MOTOR_PWM_INST, (DL_TimerG_PWMConfig *) &gMOTOR_PWMConfig);
+
+    // Set Counter control to the smallest CC index being used
+    DL_TimerG_setCounterControl(MOTOR_PWM_INST,DL_TIMER_CZC_CCCTL0_ZCOND,DL_TIMER_CAC_CCCTL0_ACOND,DL_TIMER_CLC_CCCTL0_LCOND);
 
     DL_TimerG_setCaptureCompareOutCtl(MOTOR_PWM_INST, DL_TIMER_CC_OCTL_INIT_VAL_LOW,
 		DL_TIMER_CC_OCTL_INV_OUT_DISABLED, DL_TIMER_CC_OCTL_SRC_FUNCVAL,
@@ -313,7 +394,6 @@ SYSCONFIG_WEAK void SYSCFG_DL_I2C_MPU6050_init(void) {
 
 
 }
-
 
 static const DL_UART_Main_ClockConfig gUART_DEBUGClockConfig = {
     .clockSel    = DL_UART_MAIN_CLOCK_BUSCLK,

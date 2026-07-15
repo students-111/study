@@ -79,7 +79,14 @@ extern "C" {
 #define GPIO_HFXOUT_PIN                                            DL_GPIO_PIN_6
 #define GPIO_HFXOUT_IOMUX                                        (IOMUX_PINCM11)
 #define CPUCLK_FREQ                                                     80000000
+/* Defines for SYSPLL_ERR_01 Workaround */
+/* Represent 1.000 as 1000 */
+#define FLOAT_TO_INT_SCALE                                               (1000U)
+#define FCC_EXPECTED_RATIO                                                  2000
+#define FCC_UPPER_BOUND                       (FCC_EXPECTED_RATIO * (1 + 0.003))
+#define FCC_LOWER_BOUND                       (FCC_EXPECTED_RATIO * (1 - 0.003))
 
+bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 
 
 /* Defines for MOTOR_PWM */
@@ -142,7 +149,6 @@ extern "C" {
 /* Defines for DMA_CH0 */
 #define DMA_CH0_CHAN_ID                                                      (0)
 #define UART_DEBUG_INST_DMA_TRIGGER                          (DMA_UART0_RX_TRIG)
-
 
 
 /* Port definition for Pin Group BOARD_GPIO */
@@ -212,12 +218,15 @@ extern "C" {
 
 
 
+
 /* clang-format on */
 
 void SYSCFG_DL_init(void);
 void SYSCFG_DL_initPower(void);
 void SYSCFG_DL_GPIO_init(void);
 void SYSCFG_DL_SYSCTL_init(void);
+
+bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 void SYSCFG_DL_MOTOR_PWM_init(void);
 void SYSCFG_DL_I2C_MPU6050_init(void);
 void SYSCFG_DL_UART_DEBUG_init(void);

@@ -203,6 +203,33 @@ void app_line_follow_init(void)
 }
     float pid_output;
 
+void app_line_follow_hold_stop(void)
+{
+    int16_t left_measured_cp;
+    int16_t right_measured_cp;
+    int16_t left_output_permille;
+    int16_t right_output_permille;
+    float left_pid_output;
+    float right_pid_output;
+
+    left_measured_cp = g_dal_encoder_sample[DAL_ENCODER_M1].speed_cp;
+    right_measured_cp = g_dal_encoder_sample[DAL_ENCODER_M2].speed_cp;
+
+    PID_ChangeSetpoint(&pid_gather[DAL_PID_ID_SPEED_LEFT], 0.0f);
+    left_pid_output = PID_Compute1_Rectangle(
+        &pid_gather[DAL_PID_ID_SPEED_LEFT], (float)left_measured_cp,
+        bsp_time_get_ms());
+    left_output_permille = app_line_follow_pid_to_permille(left_pid_output);
+    (void)dal_motor_set_output(DAL_MOTOR_LEFT, left_output_permille);
+
+    PID_ChangeSetpoint(&pid_gather[DAL_PID_ID_SPEED_RIGHT], 0.0f);
+    right_pid_output = PID_Compute1_Rectangle(
+        &pid_gather[DAL_PID_ID_SPEED_RIGHT], (float)right_measured_cp,
+        bsp_time_get_ms());
+    right_output_permille = app_line_follow_pid_to_permille(right_pid_output);
+    (void)dal_motor_set_output(DAL_MOTOR_RIGHT, right_output_permille);
+}
+
 void app_line_follow_refresh(void)
 {
     int16_t turn_cp;
@@ -217,10 +244,10 @@ void app_line_follow_refresh(void)
     bool left_valid;
     bool right_valid;
 
-	/*如果没有刷新过 或者 没检测到线 就停止所有电机*/
+	/*未检测到线时仍以零速度 PID 保持停车，避免节点切换直接失能电机。*/
     if ((g_dal_gray_sample.sequence == 0U) ||
         !g_dal_gray_sample.line_detected) {
-        dal_motor_stop_all();
+        app_line_follow_hold_stop();
         if (app_line_follow_debug_is_due()) {
         }
         return;

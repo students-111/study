@@ -1,0 +1,5 @@
+{"_example": {"file": "spec/architecture/index.md", "reason": "示例：删除本行"}}
+{"file":"empty/User/APP/app_task4.c","reason":"实现第四题四圈连续行驶状态机、低速差速转向/找线和第四圈速度 PID 零目标停车"}
+{"file":"empty/User/APP/app_task4.h","reason":"集中定义四圈、转向角、找线方向和低速差速调参宏"}
+{"file":"empty/User/APP/app.c","reason":"将 task4 接入应用初始化与周期调度"}
+{"file":"empty/keil/empty_LP_MSPM0G3507_nortos_keil.uvprojx","reason":"纳入 app_task4.c 的 Keil 构建清单"}

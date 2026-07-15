@@ -1,8 +1,8 @@
 @echo off
-rem Generate configuration with Keil-bound SysConfig 1.21.1 and MSPM0 SDK 2.02.
+rem Generate configuration with Keil-bound SysConfig and MSPM0 SDK.
 
-set "SYSCFG_PATH=D:\TI\TI_sys\sysconfig_cli.bat"
-set "SDK_ROOT=D:\TI\M0_SDA\mspm0_sdk_2_02_00_05"
+set "SYSCFG_PATH=C:\ti\ccs2100\ccs\utils\sysconfig_1.28.0\sysconfig_cli.bat"
+set "SDK_ROOT=C:\TI\mspm0_sdk_2_11_00_07"
 set "PROJECT_ROOT=%~dp0.."
 
 if not exist "%SYSCFG_PATH%" (

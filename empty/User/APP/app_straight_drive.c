@@ -46,12 +46,17 @@ void app_straight_drive_init(void)
 
 void app_straight_drive_enter(void)
 {
+    app_straight_drive_enter_with_offset(0L);
+}
+
+void app_straight_drive_enter_with_offset(int32_t yaw_offset_mdeg)
+{
     app_straight_drive_stop();
 
     if ((g_dal_mpu6050_sample.sequence != 0U) &&
         g_dal_mpu6050_sample.yaw_calibrated) {
         g_app_straight_drive_state.target_yaw_mdeg =
-            g_dal_mpu6050_sample.yaw_mdeg;
+            g_dal_mpu6050_sample.yaw_mdeg + yaw_offset_mdeg;
         g_app_straight_drive_state.has_target_yaw = true;
     }
 }

@@ -14,7 +14,7 @@
 #define APP_LINE_FOLLOW_PERIOD_MS      (10ULL)
 
 /* 基础目标速度，单位 counts/speed-period；循迹阶段使用。 */
-#define APP_LINE_FOLLOW_BASE_SPEED_CP  (20)
+#define APP_LINE_FOLLOW_BASE_SPEED_CP  (30)
 
 /* PID 调试打印周期，单位 ms；限制串口占用，避免影响循迹控制实时性。 */
 #define APP_LINE_FOLLOW_DEBUG_PRINT_PERIOD_MS  (100U)
@@ -52,6 +52,13 @@ void app_line_follow_init(void);
  * @return 无。
  */
 void app_line_follow_stop(void);
+
+/**
+ * @brief 使用左右轮速度 PID 将小车保持在零速度。
+ * @param void 无参数。
+ * @return 无。
+ */
+void app_line_follow_hold_stop(void);
 
 /**
  * @brief 刷新灰度循迹控制逻辑。

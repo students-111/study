@@ -1,0 +1,8 @@
+{"_example": {"file": "spec/architecture/index.md", "reason": "示例：删除本行"}}
+{"command":"python .auto-embedded\\tools\\build-keil\\scripts\\keil_builder.py --project empty\\keil\\empty_LP_MSPM0G3507_nortos_keil.uvprojx --uv4 E:\\Kill_5\\UV4\\UV4.exe --rebuild","result":"成功；日志显示 compiling app_task4.c，最终 0 Error(s), 0 Warning(s)"}
+{"command":"python .auto-embedded\\scripts\\check.py","result":"ARCH、HW、SPEC 全部 PASS"}
+{"command":"git diff --check","result":"退出码 0，无补丁空白错误"}
+{"command":"python .auto-embedded\\tools\\build-keil\\scripts\\keil_builder.py --project empty\\keil\\empty_LP_MSPM0G3507_nortos_keil.uvprojx --uv4 E:\\Kill_5\\UV4\\UV4.exe --rebuild","result":"灰度新样本确认修复后成功；日志最终 0 Error(s), 0 Warning(s)"}
+{"command":"python .auto-embedded\\scripts\\check.py","result":"灰度新样本确认修复后 ARCH、HW、SPEC 全部 PASS"}
+{"command":"python .auto-embedded\\tools\\build-keil\\scripts\\keil_builder.py --project empty\\keil\\empty_LP_MSPM0G3507_nortos_keil.uvprojx --uv4 E:\\Kill_5\\UV4\\UV4.exe --rebuild","result":"弧线捕线期实现后成功；日志最终 0 Error(s), 0 Warning(s)"}
+{"command":"python .auto-embedded\\scripts\\check.py","result":"弧线捕线期实现后 ARCH、HW、SPEC 全部 PASS"}
