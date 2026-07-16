@@ -27,7 +27,7 @@
 #define APP_TASK3_TURN_A_TO_C_MDEG               (-32000L)
 
 /* task3 的 B→D 相对转角，单位 0.001 度；需按实车 Yaw 正方向调参。 */
-#define APP_TASK3_TURN_B_TO_D_MDEG               (34700L)
+#define APP_TASK3_TURN_B_TO_D_MDEG               (48500L)
 
 /* task3 原地转向输出，单位千分比；过大易过冲，过小可能无法克服静摩擦。 */
 #define APP_TASK3_TURN_OUTPUT_PERMILLE           (300)
@@ -61,7 +61,7 @@ typedef enum {
 } app_task_e;
 
 /* 当前编译启用的赛题；需要切回时改为对应的 APP_TASK_x。 */
-#define APP_ACTIVE_TASK                         (APP_TASK_2)
+#define APP_ACTIVE_TASK                         (APP_TASK_4	)
 
 /* ======== 公开 API ======== */
 

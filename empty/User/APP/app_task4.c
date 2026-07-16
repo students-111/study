@@ -274,7 +274,11 @@ static void app_task4_enter_yaw_turn(app_task4_state_e state)
         return;
     }
 
-    delta_mdeg = APP_TASK4_TURN_A_TO_C_MDEG;
+    if (g_app_task4_state.completed_laps == 0U) {
+        delta_mdeg = APP_TASK4_FIRST_TURN_A_TO_C_MDEG;
+    } else {
+        delta_mdeg = APP_TASK4_REPEAT_TURN_A_TO_C_MDEG;
+    }
     g_app_task4_state.turn_next_state = APP_TASK4_STATE_STRAIGHT_TO_C;
     if (state == APP_TASK4_STATE_TURN_TO_D) {
         delta_mdeg = APP_TASK4_TURN_B_TO_D_MDEG;

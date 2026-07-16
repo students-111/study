@@ -16,7 +16,7 @@
 #define APP_STRAIGHT_DRIVE_PERIOD_MS       (20ULL)
 
 /* 直线保持基础目标速度，单位 counts/speed-period；低速找线调试阶段使用。 */
-#define APP_STRAIGHT_DRIVE_BASE_SPEED_CP   (30)
+#define APP_STRAIGHT_DRIVE_BASE_SPEED_CP   (50)
 
 /* 直线固定左修正量，单位 counts/speed-period；小车稳定往右偏时调大，往左偏时调小或改负数。 */
 #define APP_STRAIGHT_DRIVE_LEFT_TRIM_CP    (-0.035f)
