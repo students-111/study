@@ -122,7 +122,10 @@
 #define DAL_MPU6050_KALMAN_R_MEASURE           (0.03)
 
 /* Yaw 零偏锁定前跳过的启动样本数；用于避开 MPU6050 刚唤醒后的首帧瞬态。 */
-#define DAL_MPU6050_YAW_BIAS_SKIP_SAMPLES      (2U)
+#define DAL_MPU6050_YAW_BIAS_SKIP_SAMPLES      (10U)
+
+/* Yaw 零偏平均样本数；样本越多起步越稳，但按键前等待时间越长。 */
+#define DAL_MPU6050_YAW_BIAS_AVERAGE_SAMPLES   (20U)
 
 /* Yaw 半圈角度，单位 0.001 度；用于归一化相对航向。 */
 #define DAL_MPU6050_YAW_HALF_TURN_MDEG         (180000L)

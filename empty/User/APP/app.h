@@ -18,7 +18,7 @@
 #define APP_TASK2_STRAIGHT_NODE_CONFIRM_COUNT    (1U)
 
 /* 第二题 C 点出弯后直行航向补偿，单位 0.001 度；方向反了就改成正数。 */
-#define APP_TASK2_C_TO_D_YAW_OFFSET_MDEG         (-5000L)
+#define APP_TASK2_C_TO_D_YAW_OFFSET_MDEG         (-12500U)
 
 /* 节点提示暂停时长，单位 ms；当前以停车替代尚未具备的声光提示。 */
 #define APP_NODE_PAUSE_DURATION_MS               (1000U)
@@ -56,6 +56,7 @@ typedef enum {
     APP_TASK_2 = 0,    /**< 第二题：A→B→C→D→A。 */
     APP_TASK_3,        /**< 第三题：A→C→B→D→A。 */
     APP_TASK_4,        /**< 第四题：A→C→B→D→A 连续四圈。 */
+    APP_TASK_STRAIGHT_TEST, /**< 直行测试：按 Key1 后锁定当前航向持续直行。 */
     APP_TASK_COUNT     /**< 可执行赛题数量。 */
 } app_task_e;
 

@@ -16,7 +16,22 @@
 #define APP_STRAIGHT_DRIVE_PERIOD_MS       (20ULL)
 
 /* 直线保持基础目标速度，单位 counts/speed-period；低速找线调试阶段使用。 */
-#define APP_STRAIGHT_DRIVE_BASE_SPEED_CP   (50)
+#define APP_STRAIGHT_DRIVE_BASE_SPEED_CP   (30)
+
+/* 直线固定左修正量，单位 counts/speed-period；小车稳定往右偏时调大，往左偏时调小或改负数。 */
+#define APP_STRAIGHT_DRIVE_LEFT_TRIM_CP    (-0.035f)
+
+/* 直线角度误差死区，单位 0.001 度；误差很小时不修正，避免左右来回摆。 */
+#define APP_STRAIGHT_DRIVE_YAW_DEADBAND_MDEG  (1500L)
+
+/* 直线角度差速单周期最大变化，单位 counts/speed-period；数值越小修正越柔。 */
+#define APP_STRAIGHT_DRIVE_TURN_STEP_LIMIT_CP (0.20f)
+
+/* 正 Yaw 修正时差速输出符号；设为 1.0f 或 -1.0f，按实车 Yaw 与电机方向关系调节。 */
+#define APP_STRAIGHT_DRIVE_POSITIVE_YAW_TURN_SIGN (-1.0f)
+
+/* 直线 Yaw 修正开关；设为 1 启用角度环，设为 0 只保留速度闭环和固定微调。 */
+#define APP_STRAIGHT_DRIVE_YAW_CORRECTION_ENABLE (1U)
 
 /* Yaw 半圈角度，单位 0.001 度；用于计算最短角差。 */
 #define APP_STRAIGHT_DRIVE_YAW_HALF_TURN_MDEG  (180000L)

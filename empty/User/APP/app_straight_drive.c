@@ -20,7 +20,9 @@
 
 typedef struct {
     bool has_target_yaw;       /**< 是否已经锁定目标航向。 */
+    bool yaw_correction_enabled; /**< 当前直行段是否启用 Yaw 修正。 */
     int32_t target_yaw_mdeg;   /**< 目标航向角，单位 0.001 度。 */
+    float last_turn_cp;        /**< 上一次角度差速输出，单位 counts/speed-period。 */
 } app_straight_drive_state_t;
 
 /* ======== 内部变量 ======== */
@@ -41,7 +43,9 @@ void app_straight_drive_init(void)
     PID_Reset(&pid_gather[DAL_PID_ID_SPEED_LEFT]);
     PID_Reset(&pid_gather[DAL_PID_ID_SPEED_RIGHT]);
     g_app_straight_drive_state.has_target_yaw = false;
+    g_app_straight_drive_state.yaw_correction_enabled = false;
     g_app_straight_drive_state.target_yaw_mdeg = 0;
+    g_app_straight_drive_state.last_turn_cp = 0.0f;
 }
 
 void app_straight_drive_enter(void)
@@ -52,6 +56,9 @@ void app_straight_drive_enter(void)
 void app_straight_drive_enter_with_offset(int32_t yaw_offset_mdeg)
 {
     app_straight_drive_stop();
+    g_app_straight_drive_state.yaw_correction_enabled =
+        (APP_STRAIGHT_DRIVE_YAW_CORRECTION_ENABLE != 0U) ||
+        (yaw_offset_mdeg != 0L);
 
     if ((g_dal_mpu6050_sample.sequence != 0U) &&
         g_dal_mpu6050_sample.yaw_calibrated) {
@@ -70,14 +77,17 @@ void app_straight_drive_stop(void)
     PID_Reset(&pid_gather[DAL_PID_ID_SPEED_LEFT]);
     PID_Reset(&pid_gather[DAL_PID_ID_SPEED_RIGHT]);
     g_app_straight_drive_state.has_target_yaw = false;
+    g_app_straight_drive_state.yaw_correction_enabled = false;
     g_app_straight_drive_state.target_yaw_mdeg = 0;
+    g_app_straight_drive_state.last_turn_cp = 0.0f;
 }
 
 void app_straight_drive_refresh(void)
 {
-    int16_t turn_cp;
-    int16_t left_target_cp;
-    int16_t right_target_cp;
+    float turn_cp;
+    float turn_delta_cp;
+    float left_target_cp;
+    float right_target_cp;
     int16_t left_measured_cp;
     int16_t right_measured_cp;
     int16_t output_permille;
@@ -87,8 +97,9 @@ void app_straight_drive_refresh(void)
     bool right_valid;
 
     /* 如果没有刷新过或者 Yaw 未校准，就停止所有电机。 */
-    if ((g_dal_mpu6050_sample.sequence == 0U) ||
-        !g_dal_mpu6050_sample.yaw_calibrated) {
+    if (g_app_straight_drive_state.yaw_correction_enabled &&
+        ((g_dal_mpu6050_sample.sequence == 0U) ||
+        !g_dal_mpu6050_sample.yaw_calibrated)) {
         dal_motor_stop_all();
         PID_Reset(&pid_gather[DAL_PID_ID_STRAIGHT_ANGLE]);
         PID_Reset(&pid_gather[DAL_PID_ID_SPEED_LEFT]);
@@ -97,15 +108,19 @@ void app_straight_drive_refresh(void)
     }
 
     /* 如果没有目标航向，就用当前 Yaw 建立基准。 */
-    if (!g_app_straight_drive_state.has_target_yaw) {
+    if (g_app_straight_drive_state.yaw_correction_enabled &&
+        !g_app_straight_drive_state.has_target_yaw) {
         g_app_straight_drive_state.target_yaw_mdeg =
             g_dal_mpu6050_sample.yaw_mdeg;
         g_app_straight_drive_state.has_target_yaw = true;
     }
 
-    /* 计算最短 Yaw 角误差。 */
-    error_mdeg = g_dal_mpu6050_sample.yaw_mdeg -
-        g_app_straight_drive_state.target_yaw_mdeg;
+    /* 计算目标航向相对当前航向的最短角差。 */
+    error_mdeg = 0L;
+    if (g_app_straight_drive_state.yaw_correction_enabled) {
+        error_mdeg = g_app_straight_drive_state.target_yaw_mdeg -
+            g_dal_mpu6050_sample.yaw_mdeg;
+    }
     while (error_mdeg >= APP_STRAIGHT_DRIVE_YAW_HALF_TURN_MDEG) {
         error_mdeg -= APP_STRAIGHT_DRIVE_YAW_FULL_TURN_MDEG;
     }
@@ -114,14 +129,31 @@ void app_straight_drive_refresh(void)
     }
 
     /* 直行角度环 PID 计算。 */
-    PID_ChangeSetpoint(&pid_gather[DAL_PID_ID_STRAIGHT_ANGLE], 0.0f);
-    angle_output = PID_Compute1_Rectangle(
-        &pid_gather[DAL_PID_ID_STRAIGHT_ANGLE], (float)error_mdeg, 0U);
-    turn_cp = (int16_t)(angle_output);
+    if (!g_app_straight_drive_state.yaw_correction_enabled) {
+        angle_output = 0.0f;
+    } else if ((error_mdeg <= APP_STRAIGHT_DRIVE_YAW_DEADBAND_MDEG) &&
+        (error_mdeg >= -APP_STRAIGHT_DRIVE_YAW_DEADBAND_MDEG)) {
+        angle_output = 0.0f;
+    } else {
+        angle_output = PID_ComputeError(
+            &pid_gather[DAL_PID_ID_STRAIGHT_ANGLE], (float)error_mdeg);
+        angle_output *= APP_STRAIGHT_DRIVE_POSITIVE_YAW_TURN_SIGN;
+    }
+
+    turn_delta_cp = angle_output - g_app_straight_drive_state.last_turn_cp;
+    if (turn_delta_cp > APP_STRAIGHT_DRIVE_TURN_STEP_LIMIT_CP) {
+        turn_delta_cp = APP_STRAIGHT_DRIVE_TURN_STEP_LIMIT_CP;
+    } else if (turn_delta_cp < -APP_STRAIGHT_DRIVE_TURN_STEP_LIMIT_CP) {
+        turn_delta_cp = -APP_STRAIGHT_DRIVE_TURN_STEP_LIMIT_CP;
+    }
+    turn_cp = g_app_straight_drive_state.last_turn_cp + turn_delta_cp;
+    g_app_straight_drive_state.last_turn_cp = turn_cp;
 
     /* 差速计算。 */
-    left_target_cp = (int16_t)(APP_STRAIGHT_DRIVE_BASE_SPEED_CP - turn_cp);
-    right_target_cp = (int16_t)(APP_STRAIGHT_DRIVE_BASE_SPEED_CP + turn_cp);
+    left_target_cp = (float)APP_STRAIGHT_DRIVE_BASE_SPEED_CP + turn_cp -
+        APP_STRAIGHT_DRIVE_LEFT_TRIM_CP;
+    right_target_cp = (float)APP_STRAIGHT_DRIVE_BASE_SPEED_CP - turn_cp +
+        APP_STRAIGHT_DRIVE_LEFT_TRIM_CP;
 
     /* 是否建立编码器测速基准。 */
     left_valid = g_dal_encoder_sample[DAL_ENCODER_M1].speed_valid;

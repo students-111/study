@@ -75,7 +75,9 @@ static uint32_t g_dal_mpu6050_sample_due_ms;
 static uint32_t g_dal_mpu6050_error_retry_ms;
 static int64_t g_dal_mpu6050_yaw_mdeg;
 static int32_t g_dal_mpu6050_gyro_z_bias_mdps;
+static int64_t g_dal_mpu6050_gyro_z_bias_sum_mdps;
 static uint8_t g_dal_mpu6050_yaw_bias_skip_count;
+static uint8_t g_dal_mpu6050_yaw_bias_sample_count;
 static dal_mpu6050_kalman_t g_dal_mpu6050_kalman_x;
 static dal_mpu6050_kalman_t g_dal_mpu6050_kalman_y;
 
@@ -236,10 +238,19 @@ static void dal_mpu6050_solve_yaw(double dt)
             g_dal_mpu6050_sample.yaw_mdeg = 0;
             return;
         }
-        g_dal_mpu6050_gyro_z_bias_mdps = gyro_z_mdps;
+
+        g_dal_mpu6050_gyro_z_bias_sum_mdps += gyro_z_mdps;
+        g_dal_mpu6050_yaw_bias_sample_count++;
         g_dal_mpu6050_yaw_mdeg = 0;
         g_dal_mpu6050_sample.yaw_mdeg = 0;
-        g_dal_mpu6050_sample.yaw_calibrated = true;
+
+        if (g_dal_mpu6050_yaw_bias_sample_count >=
+            DAL_MPU6050_YAW_BIAS_AVERAGE_SAMPLES) {
+            g_dal_mpu6050_gyro_z_bias_mdps = (int32_t)(
+                g_dal_mpu6050_gyro_z_bias_sum_mdps /
+                (int64_t)DAL_MPU6050_YAW_BIAS_AVERAGE_SAMPLES);
+            g_dal_mpu6050_sample.yaw_calibrated = true;
+        }
         return;
     }
 
@@ -383,7 +394,9 @@ static dal_mpu6050_status_e dal_mpu6050_init_start(void)
     g_dal_mpu6050_yaw_mdeg = 0;
     g_dal_mpu6050_error_retry_ms = 0U;
     g_dal_mpu6050_gyro_z_bias_mdps = 0;
+    g_dal_mpu6050_gyro_z_bias_sum_mdps = 0;
     g_dal_mpu6050_yaw_bias_skip_count = 0U;
+    g_dal_mpu6050_yaw_bias_sample_count = 0U;
     g_dal_mpu6050_sample.yaw_mdeg = 0;
     g_dal_mpu6050_sample.yaw_calibrated = false;
     g_dal_mpu6050_sample.sequence = 0U;

@@ -93,6 +93,8 @@ app_task2_state_data_t g_app_task2_state;
 
 app_task3_state_data_t g_app_task3_state;
 
+static bool g_app_straight_test_running;
+
 /* ======== 内部函数声明 ======== */
 
 /**
@@ -254,6 +256,13 @@ static void app_task3_refresh_line_search(int8_t yaw_direction,
  * @return 无。
  */
 static void app_task3_refresh(void);
+
+/**
+ * @brief 刷新直行测试逻辑。
+ * @param void 无参数。
+ * @return 无。
+ */
+static void app_straight_test_refresh(void);
 
 /* ======== 内部函数 ======== */
 
@@ -438,8 +447,9 @@ static void app_task2_enter_motion_state(app_task2_state_e state)
     g_app_common_state.gray_handled_sequence = g_dal_gray_sample.sequence;
     g_app_task2_state.node_detect_armed = false;
 
-    if ((state == APP_TASK2_STATE_STRAIGHT_TO_B) ||
-        (state == APP_TASK2_STATE_STRAIGHT_TO_D)) {
+    if (state == APP_TASK2_STATE_STRAIGHT_TO_D) {
+        app_straight_drive_enter_with_offset(APP_TASK2_C_TO_D_YAW_OFFSET_MDEG);
+    } else if (state == APP_TASK2_STATE_STRAIGHT_TO_B) {
         app_straight_drive_enter();
     }
 }
@@ -795,6 +805,25 @@ static void app_task3_refresh(void)
     }
 }
 
+/**
+ * @brief 刷新直行测试逻辑。
+ * @param void 无参数。
+ * @return 无。
+ */
+static void app_straight_test_refresh(void)
+{
+    if (!g_app_straight_test_running) {
+        app_hold_motion_zero();
+        if (app_key1_start_requested() && app_task2_motion_ready()) {
+            g_app_straight_test_running = true;
+            app_straight_drive_enter();
+        }
+        return;
+    }
+
+    app_straight_drive_refresh();
+}
+
 /* ======== 公开 API ======== */
 
 void app_init(void)
@@ -824,6 +853,7 @@ void app_init(void)
     g_app_task3_state.line_search_start_ms = 0U;
     g_app_task3_state.target_yaw_mdeg = 0L;
     g_app_task3_state.line_search_armed = false;
+    g_app_straight_test_running = false;
 
     app_stop_motion();
 }
@@ -834,6 +864,8 @@ void app_refresh(void)
         app_task2_refresh();
     } else if (APP_ACTIVE_TASK == APP_TASK_3) {
         app_task3_refresh();
+    } else if (APP_ACTIVE_TASK == APP_TASK_STRAIGHT_TEST) {
+        app_straight_test_refresh();
     } else {
         app_task4_refresh();
     }

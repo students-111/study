@@ -110,7 +110,7 @@ void scheduler_run(void)
     uint32_t task_count = (uint32_t)(sizeof(g_scheduler_tasks) /
         sizeof(g_scheduler_tasks[0]));
 
-    while (1) {
+			while (1) {
         now_ms = g_bsp_time_ms;
 
         for (task_index = 0U; task_index < task_count; task_index++) {
