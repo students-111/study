@@ -540,14 +540,14 @@
               <FilePath>../User/DAL/dal_key.h</FilePath>
             </File>
             <File>
-              <FileName>dal_mpu6050.c</FileName>
+              <FileName>dal_jy901p.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../User/DAL/dal_mpu6050.c</FilePath>
+              <FilePath>../User/DAL/dal_jy901p.c</FilePath>
             </File>
             <File>
-              <FileName>dal_mpu6050.h</FileName>
+              <FileName>dal_jy901p.h</FileName>
               <FileType>5</FileType>
-              <FilePath>../User/DAL/dal_mpu6050.h</FilePath>
+              <FilePath>../User/DAL/dal_jy901p.h</FilePath>
             </File>
             <File>
               <FileName>dal_pid.c</FileName>

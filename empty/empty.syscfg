@@ -161,9 +161,9 @@ GPIO1.associatedPins[17].pin.$assign      = "PB27";
 
 const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
 
-I2C1.$name                             = "I2C_MPU6050";
+I2C1.$name                             = "I2C_JY901P";
 I2C1.basicEnableController             = true;
-I2C1.basicControllerBusSpeed           = 400000;
+I2C1.basicControllerBusSpeed           = 100000;
 I2C1.advControllerTXFIFOTRIG           = "BYTES_1";
 I2C1.advAnalogGlitchFilter             = "DISABLED";
 I2C1.intController                     = ["ARBITRATION_LOST","NACK","RXFIFO_TRIGGER","RX_DONE","TX_DONE"];

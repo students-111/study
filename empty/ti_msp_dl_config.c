@@ -51,7 +51,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     /* Module-Specific Initializations*/
     SYSCFG_DL_SYSCTL_init();
     SYSCFG_DL_MOTOR_PWM_init();
-    SYSCFG_DL_I2C_MPU6050_init();
+    SYSCFG_DL_I2C_JY901P_init();
     SYSCFG_DL_UART_DEBUG_init();
     SYSCFG_DL_DMA_init();
     SYSCFG_DL_SYSTICK_init();
@@ -64,7 +64,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_GPIO_reset(GPIOA);
     DL_GPIO_reset(GPIOB);
     DL_TimerG_reset(MOTOR_PWM_INST);
-    DL_I2C_reset(I2C_MPU6050_INST);
+    DL_I2C_reset(I2C_JY901P_INST);
     DL_UART_Main_reset(UART_DEBUG_INST);
 
 
@@ -72,7 +72,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_GPIO_enablePower(GPIOA);
     DL_GPIO_enablePower(GPIOB);
     DL_TimerG_enablePower(MOTOR_PWM_INST);
-    DL_I2C_enablePower(I2C_MPU6050_INST);
+    DL_I2C_enablePower(I2C_JY901P_INST);
     DL_UART_Main_enablePower(UART_DEBUG_INST);
 
 
@@ -90,16 +90,16 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
     DL_GPIO_initPeripheralOutputFunction(GPIO_MOTOR_PWM_C1_IOMUX,GPIO_MOTOR_PWM_C1_IOMUX_FUNC);
     DL_GPIO_enableOutput(GPIO_MOTOR_PWM_C1_PORT, GPIO_MOTOR_PWM_C1_PIN);
 
-    DL_GPIO_initPeripheralInputFunctionFeatures(GPIO_I2C_MPU6050_IOMUX_SDA,
-        GPIO_I2C_MPU6050_IOMUX_SDA_FUNC, DL_GPIO_INVERSION_DISABLE,
+    DL_GPIO_initPeripheralInputFunctionFeatures(GPIO_I2C_JY901P_IOMUX_SDA,
+        GPIO_I2C_JY901P_IOMUX_SDA_FUNC, DL_GPIO_INVERSION_DISABLE,
         DL_GPIO_RESISTOR_NONE, DL_GPIO_HYSTERESIS_DISABLE,
         DL_GPIO_WAKEUP_DISABLE);
-    DL_GPIO_initPeripheralInputFunctionFeatures(GPIO_I2C_MPU6050_IOMUX_SCL,
-        GPIO_I2C_MPU6050_IOMUX_SCL_FUNC, DL_GPIO_INVERSION_DISABLE,
+    DL_GPIO_initPeripheralInputFunctionFeatures(GPIO_I2C_JY901P_IOMUX_SCL,
+        GPIO_I2C_JY901P_IOMUX_SCL_FUNC, DL_GPIO_INVERSION_DISABLE,
         DL_GPIO_RESISTOR_NONE, DL_GPIO_HYSTERESIS_DISABLE,
         DL_GPIO_WAKEUP_DISABLE);
-    DL_GPIO_enableHiZ(GPIO_I2C_MPU6050_IOMUX_SDA);
-    DL_GPIO_enableHiZ(GPIO_I2C_MPU6050_IOMUX_SCL);
+    DL_GPIO_enableHiZ(GPIO_I2C_JY901P_IOMUX_SDA);
+    DL_GPIO_enableHiZ(GPIO_I2C_JY901P_IOMUX_SCL);
 
     DL_GPIO_initPeripheralOutputFunction(
         GPIO_UART_DEBUG_IOMUX_TX, GPIO_UART_DEBUG_IOMUX_TX_FUNC);
@@ -361,27 +361,27 @@ SYSCONFIG_WEAK void SYSCFG_DL_MOTOR_PWM_init(void) {
 }
 
 
-static const DL_I2C_ClockConfig gI2C_MPU6050ClockConfig = {
+static const DL_I2C_ClockConfig gI2C_JY901PClockConfig = {
     .clockSel = DL_I2C_CLOCK_BUSCLK,
     .divideRatio = DL_I2C_CLOCK_DIVIDE_1,
 };
 
-SYSCONFIG_WEAK void SYSCFG_DL_I2C_MPU6050_init(void) {
+SYSCONFIG_WEAK void SYSCFG_DL_I2C_JY901P_init(void) {
 
-    DL_I2C_setClockConfig(I2C_MPU6050_INST,
-        (DL_I2C_ClockConfig *) &gI2C_MPU6050ClockConfig);
-    DL_I2C_disableAnalogGlitchFilter(I2C_MPU6050_INST);
+    DL_I2C_setClockConfig(I2C_JY901P_INST,
+        (DL_I2C_ClockConfig *) &gI2C_JY901PClockConfig);
+    DL_I2C_disableAnalogGlitchFilter(I2C_JY901P_INST);
 
     /* Configure Controller Mode */
-    DL_I2C_resetControllerTransfer(I2C_MPU6050_INST);
-    /* Set frequency to 400000 Hz*/
-    DL_I2C_setTimerPeriod(I2C_MPU6050_INST, 9);
-    DL_I2C_setControllerTXFIFOThreshold(I2C_MPU6050_INST, DL_I2C_TX_FIFO_LEVEL_BYTES_1);
-    DL_I2C_setControllerRXFIFOThreshold(I2C_MPU6050_INST, DL_I2C_RX_FIFO_LEVEL_BYTES_1);
-    DL_I2C_enableControllerClockStretching(I2C_MPU6050_INST);
+    DL_I2C_resetControllerTransfer(I2C_JY901P_INST);
+    /* Set frequency to 100000 Hz*/
+    DL_I2C_setTimerPeriod(I2C_JY901P_INST, 39);
+    DL_I2C_setControllerTXFIFOThreshold(I2C_JY901P_INST, DL_I2C_TX_FIFO_LEVEL_BYTES_1);
+    DL_I2C_setControllerRXFIFOThreshold(I2C_JY901P_INST, DL_I2C_RX_FIFO_LEVEL_BYTES_1);
+    DL_I2C_enableControllerClockStretching(I2C_JY901P_INST);
 
     /* Configure Interrupts */
-    DL_I2C_enableInterrupt(I2C_MPU6050_INST,
+    DL_I2C_enableInterrupt(I2C_JY901P_INST,
                            DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST |
                            DL_I2C_INTERRUPT_CONTROLLER_NACK |
                            DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER |
@@ -390,7 +390,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_I2C_MPU6050_init(void) {
 
 
     /* Enable module */
-    DL_I2C_enableController(I2C_MPU6050_INST);
+    DL_I2C_enableController(I2C_JY901P_INST);
 
 
 }

@@ -14,7 +14,7 @@
 #define APP_LINE_FOLLOW_PERIOD_MS      (10ULL)
 
 /* 基础目标速度，单位 counts/speed-period；循迹阶段使用。 */
-#define APP_LINE_FOLLOW_BASE_SPEED_CP  (50)
+#define APP_LINE_FOLLOW_BASE_SPEED_CP  (40)
 
 /* PID 调试打印周期，单位 ms；限制串口占用，避免影响循迹控制实时性。 */
 #define APP_LINE_FOLLOW_DEBUG_PRINT_PERIOD_MS  (100U)

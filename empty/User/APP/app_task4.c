@@ -18,7 +18,7 @@
 #include "dal_gray.h"
 #include "dal_key.h"
 #include "dal_motor.h"
-#include "dal_mpu6050.h"
+#include "dal_jy901p.h"
 #include "dal_pid.h"
 
 /* ======== 可调参数宏定义 ======== */
@@ -50,7 +50,8 @@ typedef enum {
 typedef struct {
     app_task4_state_e current_state;    /**< 当前第四题状态。 */
     app_task4_state_e turn_next_state;  /**< 低速航向转向完成后的目标状态。 */
-    int32_t target_yaw_mdeg;            /**< 低速航向转向目标 Yaw，单位 0.001 度。 */
+    int32_t target_yaw_raw;            /**< 低速航向转向目标 Yaw，单位原始角度 LSB。 */
+    uint32_t turn_start_ms;             /**< 当前原地航向转向开始时刻，单位 ms。 */
     uint32_t key1_handled_sequence;     /**< 已消费的 Key1 快照序号。 */
     uint32_t gray_handled_sequence;     /**< 已消费的灰度快照序号。 */
     uint8_t gray_confirm_count;         /**< 当前灰度状态连续确认次数。 */
@@ -61,17 +62,16 @@ typedef struct {
 } app_task4_state_data_t;
 
 /* ======== 内部变量 ======== */
-
 static app_task4_state_data_t g_app_task4_state;
 
 /* ======== 内部函数声明 ======== */
 
 /**
  * @brief 将 Yaw 归一化到正负半圈范围。
- * @param yaw_mdeg 待归一化的 Yaw，单位 0.001 度。
- * @return 归一化后的 Yaw，范围为 [-180000, 180000)。
+ * @param yaw_raw 待归一化的 Yaw，单位原始角度 LSB。
+ * @return 归一化后的 Yaw，范围为 [-32768, 32768)。
  */
-static int32_t app_task4_normalize_yaw_mdeg(int32_t yaw_mdeg);
+static int32_t app_task4_normalize_yaw_raw(int32_t yaw_raw);
 
 /**
  * @brief 判断是否收到尚未消费的 Key1 按下事件。
@@ -153,20 +153,20 @@ static void app_task4_enter_state(app_task4_state_e state);
 
 /**
  * @brief 将 Yaw 归一化到正负半圈范围。
- * @param yaw_mdeg 待归一化的 Yaw，单位 0.001 度。
- * @return 归一化后的 Yaw，范围为 [-180000, 180000)。
+ * @param yaw_raw 待归一化的 Yaw，单位原始角度 LSB。
+ * @return 归一化后的 Yaw，范围为 [-32768, 32768)。
  */
-static int32_t app_task4_normalize_yaw_mdeg(int32_t yaw_mdeg)
+static int32_t app_task4_normalize_yaw_raw(int32_t yaw_raw)
 {
-    while (yaw_mdeg >= DAL_MPU6050_YAW_HALF_TURN_MDEG) {
-        yaw_mdeg -= DAL_MPU6050_YAW_FULL_TURN_MDEG;
+    while (yaw_raw >= DAL_JY901P_YAW_HALF_TURN_RAW) {
+        yaw_raw -= DAL_JY901P_YAW_FULL_TURN_RAW;
     }
 
-    while (yaw_mdeg < -DAL_MPU6050_YAW_HALF_TURN_MDEG) {
-        yaw_mdeg += DAL_MPU6050_YAW_FULL_TURN_MDEG;
+    while (yaw_raw < -DAL_JY901P_YAW_HALF_TURN_RAW) {
+        yaw_raw += DAL_JY901P_YAW_FULL_TURN_RAW;
     }
 
-    return yaw_mdeg;
+    return yaw_raw;
 }
 
 /**
@@ -266,28 +266,29 @@ static void app_task4_hold_zero_speed(void)
  */
 static void app_task4_enter_yaw_turn(app_task4_state_e state)
 {
-    int32_t delta_mdeg;
+    int32_t delta_raw;
 
-    if ((g_dal_mpu6050_sample.sequence == 0U) ||
-        !g_dal_mpu6050_sample.yaw_calibrated) {
+    if ((g_dal_jy901p_sample.sequence == 0U) ||
+        !g_dal_jy901p_sample.angle_reference_ready) {
         g_app_task4_state.current_state = APP_TASK4_STATE_FINISHED;
         return;
     }
 
     if (g_app_task4_state.completed_laps == 0U) {
-        delta_mdeg = APP_TASK4_FIRST_TURN_A_TO_C_MDEG;
+        delta_raw = APP_TASK4_FIRST_TURN_A_TO_C_RAW;
     } else {
-        delta_mdeg = APP_TASK4_REPEAT_TURN_A_TO_C_MDEG;
+        delta_raw = APP_TASK4_REPEAT_TURN_A_TO_C_RAW;
     }
     g_app_task4_state.turn_next_state = APP_TASK4_STATE_STRAIGHT_TO_C;
     if (state == APP_TASK4_STATE_TURN_TO_D) {
-        delta_mdeg = APP_TASK4_TURN_B_TO_D_MDEG;
+        delta_raw = APP_TASK4_TURN_B_TO_D_RAW;
         g_app_task4_state.turn_next_state = APP_TASK4_STATE_STRAIGHT_TO_D;
     }
 
     g_app_task4_state.current_state = state;
-    g_app_task4_state.target_yaw_mdeg = app_task4_normalize_yaw_mdeg(
-        g_dal_mpu6050_sample.yaw_mdeg + delta_mdeg);
+    g_app_task4_state.turn_start_ms = bsp_time_get_ms();
+    g_app_task4_state.target_yaw_raw = app_task4_normalize_yaw_raw(
+        g_dal_jy901p_sample.yaw_raw + delta_raw);
     g_app_task4_state.gray_confirm_count = 0U;
 }
 
@@ -298,25 +299,31 @@ static void app_task4_enter_yaw_turn(app_task4_state_e state)
  */
 static void app_task4_refresh_yaw_turn(void)
 {
-    int32_t yaw_error_mdeg;
+    int32_t yaw_error_raw;
     int16_t turn_delta_cp = APP_TASK4_TRANSITION_TURN_DELTA_CP;
 
-    if ((g_dal_mpu6050_sample.sequence == 0U) ||
-        !g_dal_mpu6050_sample.yaw_calibrated) {
+    if ((g_dal_jy901p_sample.sequence == 0U) ||
+        !g_dal_jy901p_sample.angle_reference_ready) {
         g_app_task4_state.current_state = APP_TASK4_STATE_FINISHED;
         return;
     }
 
-    yaw_error_mdeg = app_task4_normalize_yaw_mdeg(
-        g_app_task4_state.target_yaw_mdeg -
-        g_dal_mpu6050_sample.yaw_mdeg);
-    if ((yaw_error_mdeg <= APP_TASK4_TURN_TOLERANCE_MDEG) &&
-        (yaw_error_mdeg >= -APP_TASK4_TURN_TOLERANCE_MDEG)) {
+    if ((uint32_t)(bsp_time_get_ms() - g_app_task4_state.turn_start_ms) >=
+        APP_TASK4_TURN_TIMEOUT_MS) {
+        app_task4_hold_zero_speed();
+        g_app_task4_state.current_state = APP_TASK4_STATE_FINISHED;
+        return;
+    }
+    yaw_error_raw = app_task4_normalize_yaw_raw(
+        g_app_task4_state.target_yaw_raw -
+        g_dal_jy901p_sample.yaw_raw);
+    if ((yaw_error_raw <= APP_TASK4_TURN_TOLERANCE_RAW) &&
+        (yaw_error_raw >= -APP_TASK4_TURN_TOLERANCE_RAW)) {
         app_task4_enter_state(g_app_task4_state.turn_next_state);
         return;
     }
 
-    if (yaw_error_mdeg < 0L) {
+    if (yaw_error_raw < 0L) {
         turn_delta_cp = -turn_delta_cp;
     }
     turn_delta_cp = (int16_t)(turn_delta_cp *
@@ -415,7 +422,8 @@ void app_task4_init(void)
 
     g_app_task4_state.current_state = APP_TASK4_STATE_WAIT_KEY1;
     g_app_task4_state.turn_next_state = APP_TASK4_STATE_FINISHED;
-    g_app_task4_state.target_yaw_mdeg = 0L;
+    g_app_task4_state.target_yaw_raw = 0L;
+    g_app_task4_state.turn_start_ms = 0U;
     g_app_task4_state.key1_handled_sequence =
         g_dal_key_sample[DAL_KEY_KEY1].sequence;
     g_app_task4_state.gray_handled_sequence = g_dal_gray_sample.sequence;
@@ -432,7 +440,9 @@ void app_task4_refresh(void)
     switch (g_app_task4_state.current_state) {
     case APP_TASK4_STATE_WAIT_KEY1:
         app_task4_hold_zero_speed();
-        if (app_task4_key1_start_requested()) {
+        if ((g_dal_jy901p_sample.sequence != 0U) &&
+            g_dal_jy901p_sample.angle_reference_ready &&
+            app_task4_key1_start_requested()) {
             app_task4_enter_yaw_turn(APP_TASK4_STATE_TURN_TO_C);
         }
         break;

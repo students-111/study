@@ -193,17 +193,17 @@
         <Ww>
           <count>7</count>
           <WinNumber>1</WinNumber>
-          <ItemText>g_app_task2_state</ItemText>
+          <ItemText>g_app_task4_state</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>1</WinNumber>
-          <ItemText>g_app_common_state</ItemText>
+          <ItemText>g_dal_jy901p_sample</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>1</WinNumber>
-          <ItemText>\\empty_LP_MSPM0G3507_nortos_keil\../User/APP/app.c\g_app_task2_state.current_state</ItemText>
+          <ItemText>dal_jy901p_sample_t</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -524,7 +524,7 @@
 
   <Group>
     <GroupName>User/DAL</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -631,8 +631,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>../User/DAL/dal_mpu6050.c</PathWithFileName>
-      <FilenameWithoutPath>dal_mpu6050.c</FilenameWithoutPath>
+      <PathWithFileName>../User/DAL/dal_jy901p.c</PathWithFileName>
+      <FilenameWithoutPath>dal_jy901p.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -643,8 +643,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>../User/DAL/dal_mpu6050.h</PathWithFileName>
-      <FilenameWithoutPath>dal_mpu6050.h</FilenameWithoutPath>
+      <PathWithFileName>../User/DAL/dal_jy901p.h</PathWithFileName>
+      <FilenameWithoutPath>dal_jy901p.h</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

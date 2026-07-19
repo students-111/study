@@ -16,7 +16,7 @@
 #include "dal_gray.h"
 #include "bsp_time.h"
 #include "dal_key.h"
-#include "dal_mpu6050.h"
+#include "dal_jy901p.h"
 #include "ti_msp_dl_config.h"
 
 /* ======== 类型定义 ======== */
@@ -40,7 +40,7 @@ static scheduler_task_t g_scheduler_tasks[] = {
     {dal_gray_refresh, APP_PERIOD_MS, 0U},
     {dal_encoder_update_speed, APP_PERIOD_MS, 0U},
     {dal_key_refresh, APP_PERIOD_MS, 0U},
-    {dal_mpu6050_refresh, APP_PERIOD_MS, 0U},
+    {dal_jy901p_refresh, APP_PERIOD_MS, 0U},
     {app_refresh, APP_PERIOD_MS, 0U},
 };
 
@@ -99,7 +99,7 @@ void scheduler_init(void)
     dal_gray_init();
     dal_encoder_init();
     dal_key_init();
-    dal_mpu6050_init();
+    dal_jy901p_init();
     app_init();
 }
 

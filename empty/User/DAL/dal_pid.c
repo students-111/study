@@ -60,5 +60,5 @@ void dal_pid_init(void)
 
     /* 直线角度外环：Kp, Ki, Kd, 输出限幅, 积分限幅。 */
     dal_pid_config_one(&pid_gather[DAL_PID_ID_STRAIGHT_ANGLE],
-        0.000125f, 0.0f, 0.0f, 4.0f, 0.0f);
+        DAL_PID_STRAIGHT_ANGLE_KP_RAW, 0.0f, 0.0f, 4.0f, 0.0f);
 }

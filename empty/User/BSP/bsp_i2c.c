@@ -52,16 +52,16 @@ static uint32_t g_bsp_i2c_deadline_ms;
 static void bsp_i2c_start_tx(void)
 {
     g_bsp_i2c_tx_count = DL_I2C_fillControllerTXFIFO(
-        I2C_MPU6050_INST, g_bsp_i2c_tx, g_bsp_i2c_tx_len);
+        I2C_JY901P_INST, g_bsp_i2c_tx, g_bsp_i2c_tx_len);
 
     if (g_bsp_i2c_tx_count < g_bsp_i2c_tx_len) {
-        DL_I2C_enableInterrupt(I2C_MPU6050_INST,
+        DL_I2C_enableInterrupt(I2C_JY901P_INST,
             DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER);
     }
 
     g_bsp_i2c_state = BSP_I2C_TX;
 
-    DL_I2C_startControllerTransferAdvanced(I2C_MPU6050_INST, g_bsp_i2c_addr,
+    DL_I2C_startControllerTransferAdvanced(I2C_JY901P_INST, g_bsp_i2c_addr,
         DL_I2C_CONTROLLER_DIRECTION_TX, g_bsp_i2c_tx_len,
         DL_I2C_CONTROLLER_START_ENABLE,
         (g_bsp_i2c_op == BSP_I2C_OP_READ) ?
@@ -78,7 +78,7 @@ static void bsp_i2c_start_rx(void)
 {
     g_bsp_i2c_rx_count = 0U;
     g_bsp_i2c_state = BSP_I2C_RX;
-    DL_I2C_startControllerTransferAdvanced(I2C_MPU6050_INST, g_bsp_i2c_addr,
+    DL_I2C_startControllerTransferAdvanced(I2C_JY901P_INST, g_bsp_i2c_addr,
         DL_I2C_CONTROLLER_DIRECTION_RX, g_bsp_i2c_rx_len,
         DL_I2C_CONTROLLER_START_ENABLE, DL_I2C_CONTROLLER_STOP_ENABLE,
         DL_I2C_CONTROLLER_ACK_DISABLE);
@@ -93,9 +93,9 @@ static void bsp_i2c_drain_rx(void)
 {
     uint8_t fifo_count = 0U;
 
-    while (!DL_I2C_isControllerRXFIFOEmpty(I2C_MPU6050_INST) &&
+    while (!DL_I2C_isControllerRXFIFOEmpty(I2C_JY901P_INST) &&
            (fifo_count < BSP_I2C_FIFO_DRAIN_LIMIT)) {
-        uint8_t data = DL_I2C_receiveControllerData(I2C_MPU6050_INST);
+        uint8_t data = DL_I2C_receiveControllerData(I2C_JY901P_INST);
 
         if (g_bsp_i2c_rx_count < g_bsp_i2c_rx_len) {
             g_bsp_i2c_rx[g_bsp_i2c_rx_count++] = data;
@@ -117,12 +117,12 @@ static void bsp_i2c_handle_irq(DL_I2C_IIDX iidx)
 
     if (iidx == DL_I2C_IIDX_CONTROLLER_TXFIFO_TRIGGER) {
         if (g_bsp_i2c_tx_count < g_bsp_i2c_tx_len) {
-            g_bsp_i2c_tx_count += DL_I2C_fillControllerTXFIFO(I2C_MPU6050_INST,
+            g_bsp_i2c_tx_count += DL_I2C_fillControllerTXFIFO(I2C_JY901P_INST,
                 &g_bsp_i2c_tx[g_bsp_i2c_tx_count],
                 (uint16_t)(g_bsp_i2c_tx_len - g_bsp_i2c_tx_count));
         }
     } else if (iidx == DL_I2C_IIDX_CONTROLLER_TX_DONE) {
-        DL_I2C_disableInterrupt(I2C_MPU6050_INST,
+        DL_I2C_disableInterrupt(I2C_JY901P_INST,
             DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER);
         if (g_bsp_i2c_op == BSP_I2C_OP_READ) {
             bsp_i2c_start_rx();
@@ -148,7 +148,7 @@ static void bsp_i2c_handle_irq(DL_I2C_IIDX iidx)
 static bool bsp_i2c_is_busy(void)
 {
     return (g_bsp_i2c_state != BSP_I2C_IDLE) ||
-        !(DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_IDLE);
+        !(DL_I2C_getControllerStatus(I2C_JY901P_INST) & DL_I2C_CONTROLLER_STATUS_IDLE);
 }
 
 /* ======== 公开 API ======== */
@@ -159,11 +159,11 @@ bsp_status_e bsp_i2c_init(void)
      * WHY: 引脚、时钟、400 kHz 周期、FIFO 阈值和中断源由 SysConfig
      * 统一生成，BSP 只接管运行期事务状态和 NVIC 入口。
      */
-    DL_I2C_resetControllerTransfer(I2C_MPU6050_INST);
+    DL_I2C_resetControllerTransfer(I2C_JY901P_INST);
 
-    NVIC_SetPriority(I2C_MPU6050_INST_INT_IRQN, BSP_I2C_IRQ_PRIORITY);
-    NVIC_ClearPendingIRQ(I2C_MPU6050_INST_INT_IRQN);
-    NVIC_EnableIRQ(I2C_MPU6050_INST_INT_IRQN);
+    NVIC_SetPriority(I2C_JY901P_INST_INT_IRQN, BSP_I2C_IRQ_PRIORITY);
+    NVIC_ClearPendingIRQ(I2C_JY901P_INST_INT_IRQN);
+    NVIC_EnableIRQ(I2C_JY901P_INST_INT_IRQN);
     g_bsp_i2c_state = BSP_I2C_IDLE;
     return BSP_OK;
 }
@@ -226,14 +226,14 @@ bsp_status_e bsp_i2c_poll(void)
         return BSP_OK;
     }
     if (state == BSP_I2C_ERROR) {
-        DL_I2C_resetControllerTransfer(I2C_MPU6050_INST);
+        DL_I2C_resetControllerTransfer(I2C_JY901P_INST);
         g_bsp_i2c_state = BSP_I2C_IDLE;
         return BSP_ERR_HW;
     }
 
     if ((state != BSP_I2C_IDLE) &&
         ((int32_t)(bsp_time_get_ms() - g_bsp_i2c_deadline_ms) >= 0)) {
-        DL_I2C_resetControllerTransfer(I2C_MPU6050_INST);
+        DL_I2C_resetControllerTransfer(I2C_JY901P_INST);
         g_bsp_i2c_state = BSP_I2C_IDLE;
         return BSP_ERR_TIMEOUT;
     }
@@ -242,5 +242,5 @@ bsp_status_e bsp_i2c_poll(void)
 
 void I2C0_IRQHandler(void)
 {
-    bsp_i2c_handle_irq(DL_I2C_getPendingInterrupt(I2C_MPU6050_INST));
+    bsp_i2c_handle_irq(DL_I2C_getPendingInterrupt(I2C_JY901P_INST));
 }

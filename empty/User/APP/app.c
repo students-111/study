@@ -18,7 +18,7 @@
 #include "dal_gray.h"
 #include "dal_key.h"
 #include "dal_motor.h"
-#include "dal_mpu6050.h"
+#include "dal_jy901p.h"
 
 /* ======== 类型定义 ======== */
 
@@ -81,7 +81,7 @@ typedef struct {
     app_task3_state_e turn_next_state;   /**< 原地转向完成后的目标状态。 */
     uint32_t pause_start_ms;             /**< 节点暂停开始时刻，单位 ms。 */
     uint32_t line_search_start_ms;       /**< 寻找弧线开始时刻，单位 ms。 */
-    int32_t target_yaw_mdeg;             /**< 原地转向目标 Yaw，单位 0.001 度。 */
+    int32_t target_yaw_raw;             /**< 原地转向目标 Yaw，单位原始角度 LSB。 */
     bool line_search_armed;              /**< 已离开端点黑线，可接受重新检测到的弧线。 */
 } app_task3_state_data_t;
 
@@ -159,16 +159,16 @@ static bool app_key1_start_requested(void);
 /**
  * @brief 判断第二题直行所需的姿态和测速数据是否已经就绪。
  * @param void 无参数。
- * @return Yaw 已校准且左右编码器测速有效时返回 true，否则返回 false。
+ * @return 角度参考已就绪且左右编码器测速有效时返回 true，否则返回 false。
  */
 static bool app_task2_motion_ready(void);
 
 /**
  * @brief 将 Yaw 角度归一化到半圈范围。
- * @param yaw_mdeg 待归一化的 Yaw，单位 0.001 度。
- * @return 归一化后的 Yaw，范围为 [-180000, 180000)。
+ * @param yaw_raw 待归一化的 Yaw，单位原始角度 LSB。
+ * @return 归一化后的 Yaw，范围为 [-32768, 32768)。
  */
-static int32_t app_normalize_yaw_mdeg(int32_t yaw_mdeg);
+static int32_t app_normalize_yaw_raw(int32_t yaw_raw);
 
 /**
  * @brief 进入第二题非暂停行驶状态。
@@ -201,9 +201,9 @@ static void app_task2_refresh(void);
 /**
  * @brief 获取第三题指定原地转向状态的相对目标角。
  * @param state 第三题原地转向状态。
- * @return 相对转角，单位 0.001 度。
+ * @return 相对转角，单位原始角度 LSB。
  */
-static int32_t app_task3_get_turn_delta_mdeg(app_task3_state_e state);
+static int32_t app_task3_get_turn_delta_raw(app_task3_state_e state);
 
 /**
  * @brief 获取第三题指定原地转向状态完成后的目标状态。
@@ -366,12 +366,12 @@ static bool app_key1_start_requested(void)
 /**
  * @brief 判断第二题直行所需的姿态和测速数据是否已经就绪。
  * @param void 无参数。
- * @return Yaw 已校准且左右编码器测速有效时返回 true，否则返回 false。
+ * @return 角度参考已就绪且左右编码器测速有效时返回 true，否则返回 false。
  */
 static bool app_task2_motion_ready(void)
 {
-    return ((g_dal_mpu6050_sample.sequence != 0U) &&
-        g_dal_mpu6050_sample.yaw_calibrated &&
+    return ((g_dal_jy901p_sample.sequence != 0U) &&
+        g_dal_jy901p_sample.angle_reference_ready &&
         g_dal_encoder_sample[DAL_ENCODER_M1].speed_valid &&
         g_dal_encoder_sample[DAL_ENCODER_M2].speed_valid);
 }
@@ -418,20 +418,20 @@ static bool app_task2_follow_exit_is_confirmed(void)
 
 /**
  * @brief 将 Yaw 角度归一化到半圈范围。
- * @param yaw_mdeg 待归一化的 Yaw，单位 0.001 度。
- * @return 归一化后的 Yaw，范围为 [-180000, 180000)。
+ * @param yaw_raw 待归一化的 Yaw，单位原始角度 LSB。
+ * @return 归一化后的 Yaw，范围为 [-32768, 32768)。
  */
-static int32_t app_normalize_yaw_mdeg(int32_t yaw_mdeg)
+static int32_t app_normalize_yaw_raw(int32_t yaw_raw)
 {
-    while (yaw_mdeg >= DAL_MPU6050_YAW_HALF_TURN_MDEG) {
-        yaw_mdeg -= DAL_MPU6050_YAW_FULL_TURN_MDEG;
+    while (yaw_raw >= DAL_JY901P_YAW_HALF_TURN_RAW) {
+        yaw_raw -= DAL_JY901P_YAW_FULL_TURN_RAW;
     }
 
-    while (yaw_mdeg < -DAL_MPU6050_YAW_HALF_TURN_MDEG) {
-        yaw_mdeg += DAL_MPU6050_YAW_FULL_TURN_MDEG;
+    while (yaw_raw < -DAL_JY901P_YAW_HALF_TURN_RAW) {
+        yaw_raw += DAL_JY901P_YAW_FULL_TURN_RAW;
     }
 
-    return yaw_mdeg;
+    return yaw_raw;
 }
 
 /**
@@ -448,7 +448,7 @@ static void app_task2_enter_motion_state(app_task2_state_e state)
     g_app_task2_state.node_detect_armed = false;
 
     if (state == APP_TASK2_STATE_STRAIGHT_TO_D) {
-        app_straight_drive_enter_with_offset(APP_TASK2_C_TO_D_YAW_OFFSET_MDEG);
+        app_straight_drive_enter_with_offset(APP_TASK2_C_TO_D_YAW_OFFSET_RAW);
     } else if (state == APP_TASK2_STATE_STRAIGHT_TO_B) {
         app_straight_drive_enter();
     }
@@ -550,15 +550,15 @@ static void app_task2_refresh(void)
 /**
  * @brief 获取第三题指定原地转向状态的相对目标角。
  * @param state 第三题原地转向状态。
- * @return 相对转角，单位 0.001 度。
+ * @return 相对转角，单位原始角度 LSB。
  */
-static int32_t app_task3_get_turn_delta_mdeg(app_task3_state_e state)
+static int32_t app_task3_get_turn_delta_raw(app_task3_state_e state)
 {
     switch (state) {
     case APP_TASK3_STATE_TURN_TO_C:
-        return APP_TASK3_TURN_A_TO_C_MDEG;
+        return APP_TASK3_TURN_A_TO_C_RAW;
     case APP_TASK3_STATE_TURN_TO_D:
-        return APP_TASK3_TURN_B_TO_D_MDEG;
+        return APP_TASK3_TURN_B_TO_D_RAW;
     default:
         return 0L;
     }
@@ -599,15 +599,15 @@ static void app_task3_enter_state(app_task3_state_e state)
         app_straight_drive_enter();
     } else if ((state == APP_TASK3_STATE_TURN_TO_C) ||
         (state == APP_TASK3_STATE_TURN_TO_D)) {
-        if ((g_dal_mpu6050_sample.sequence == 0U) ||
-            !g_dal_mpu6050_sample.yaw_calibrated) {
+        if ((g_dal_jy901p_sample.sequence == 0U) ||
+            !g_dal_jy901p_sample.angle_reference_ready) {
             g_app_task3_state.current_state = APP_TASK3_STATE_FINISHED;
             return;
         }
 
-        g_app_task3_state.target_yaw_mdeg = app_normalize_yaw_mdeg(
-            g_dal_mpu6050_sample.yaw_mdeg +
-            app_task3_get_turn_delta_mdeg(state));
+        g_app_task3_state.target_yaw_raw = app_normalize_yaw_raw(
+            g_dal_jy901p_sample.yaw_raw +
+            app_task3_get_turn_delta_raw(state));
         g_app_task3_state.turn_next_state =
             app_task3_get_turn_next_state(state);
     } else if ((state == APP_TASK3_STATE_FIND_LINE_TO_B) ||
@@ -639,29 +639,29 @@ static void app_task3_enter_node_pause(app_task3_state_e next_state)
  */
 static void app_task3_refresh_turn(void)
 {
-    int32_t yaw_error_mdeg;
+    int32_t yaw_error_raw;
     int16_t left_output_permille;
 
-    if ((g_dal_mpu6050_sample.sequence == 0U) ||
-        !g_dal_mpu6050_sample.yaw_calibrated) {
+    if ((g_dal_jy901p_sample.sequence == 0U) ||
+        !g_dal_jy901p_sample.angle_reference_ready) {
         app_stop_motion();
         g_app_task3_state.current_state = APP_TASK3_STATE_FINISHED;
         return;
     }
 
-    yaw_error_mdeg = app_normalize_yaw_mdeg(
-        g_app_task3_state.target_yaw_mdeg -
-        g_dal_mpu6050_sample.yaw_mdeg);
+    yaw_error_raw = app_normalize_yaw_raw(
+        g_app_task3_state.target_yaw_raw -
+        g_dal_jy901p_sample.yaw_raw);
 
-    if ((yaw_error_mdeg <= APP_TASK3_TURN_TOLERANCE_MDEG) &&
-        (yaw_error_mdeg >= -APP_TASK3_TURN_TOLERANCE_MDEG)) {
+    if ((yaw_error_raw <= APP_TASK3_TURN_TOLERANCE_RAW) &&
+        (yaw_error_raw >= -APP_TASK3_TURN_TOLERANCE_RAW)) {
         app_stop_motion();
         app_task3_enter_state(g_app_task3_state.turn_next_state);
         return;
     }
 
     left_output_permille = APP_TASK3_TURN_OUTPUT_PERMILLE;
-    if (yaw_error_mdeg < 0L) {
+    if (yaw_error_raw < 0L) {
         left_output_permille = -left_output_permille;
     }
 
@@ -729,7 +729,9 @@ static void app_task3_refresh(void)
     switch (g_app_task3_state.current_state) {
     case APP_TASK3_STATE_WAIT_KEY1:
         app_hold_motion_zero();
-        if (app_key1_start_requested()) {
+        if ((g_dal_jy901p_sample.sequence != 0U) &&
+            g_dal_jy901p_sample.angle_reference_ready &&
+            app_key1_start_requested()) {
             app_task3_enter_state(APP_TASK3_STATE_TURN_TO_C);
         }
         break;
@@ -851,7 +853,7 @@ void app_init(void)
     g_app_task3_state.turn_next_state = APP_TASK3_STATE_FINISHED;
     g_app_task3_state.pause_start_ms = 0U;
     g_app_task3_state.line_search_start_ms = 0U;
-    g_app_task3_state.target_yaw_mdeg = 0L;
+    g_app_task3_state.target_yaw_raw = 0L;
     g_app_task3_state.line_search_armed = false;
     g_app_straight_test_running = false;
 

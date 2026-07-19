@@ -12,25 +12,27 @@
 #define APP_TASK4_LAP_COUNT                       (4U)
 
 /* 节点低速转向基础速度，单位 counts/测速周期；初始值用于经验调参。 */
-#define APP_TASK4_TRANSITION_BASE_SPEED_CP         (45)
+#define APP_TASK4_TRANSITION_BASE_SPEED_CP         (40)
 
 /* 节点低速转向差速量，单位 counts/测速周期；与基础速度共同决定转弯曲率。 */
 #define APP_TASK4_TRANSITION_TURN_DELTA_CP         (25)
 
-/* 低速航向转向到位容差，单位 0.001 度；进入该范围后切换到下一行驶段。 */
-#define APP_TASK4_TURN_TOLERANCE_MDEG              (2000L)
+/* 低速航向转向到位容差，单位原始角度 LSB；进入该范围后切换到下一行驶段。 */
+#define APP_TASK4_TURN_TOLERANCE_RAW              (364L)
+/* 原地航向转向的最长允许时间，单位 ms；角度数据冻结或持续偏离时停车，防止小车无限转圈。 */
+#define APP_TASK4_TURN_TIMEOUT_MS                   (5000U)
 
 /* 正 Yaw 转向时左右轮差速符号；设为 1 或 -1，按实车 Yaw 与电机方向关系调节。 */
 #define APP_TASK4_POSITIVE_YAW_TURN_SIGN           (1)
 
-/* A→C 低速航向转向相对角，单位 0.001 度；需按实车调参。 */
-#define APP_TASK4_FIRST_TURN_A_TO_C_MDEG           (-36500L)
+/* A→C 低速航向转向相对角，单位原始角度 LSB；需按实车调参。 */
+#define APP_TASK4_FIRST_TURN_A_TO_C_RAW           (-6645L)
 
-/* 后续圈 A→C 低速航向转向相对角，单位 0.001 度；从 D→A 回到 A 后使用。 */
-#define APP_TASK4_REPEAT_TURN_A_TO_C_MDEG          (-54000L)
+/* 后续圈 A→C 低速航向转向相对角，单位原始角度 LSB；从 D→A 回到 A 后使用。 */
+#define APP_TASK4_REPEAT_TURN_A_TO_C_RAW          (-9830L)
 
-/* B→D 低速航向转向相对角，单位 0.001 度；需按实车调参。 */
-#define APP_TASK4_TURN_B_TO_D_MDEG                 (60000L)
+/* B→D 低速航向转向相对角，单位原始角度 LSB；需按实车调参。 */
+#define APP_TASK4_TURN_B_TO_D_RAW                 (10923L)
 
 /* C 点找右侧半圆的差速方向；设为 1 或 -1，按实车调节。 */
 #define APP_TASK4_FIND_LINE_TO_B_TURN_SIGN         (1)

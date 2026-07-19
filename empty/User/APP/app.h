@@ -17,23 +17,23 @@
 /* 第二题直行遇黑线停车确认次数，单位 次；数值越小越容易停车。 */
 #define APP_TASK2_STRAIGHT_NODE_CONFIRM_COUNT    (1U)
 
-/* 第二题 C 点出弯后直行航向补偿，单位 0.001 度；方向反了就改成正数。 */
-#define APP_TASK2_C_TO_D_YAW_OFFSET_MDEG         (-12500U)
+/* 第二题 C 点出弯后直行航向补偿，单位原始角度 LSB；方向反了就改成正数。 */
+#define APP_TASK2_C_TO_D_YAW_OFFSET_RAW         (-2276L)
 
 /* 节点提示暂停时长，单位 ms；当前以停车替代尚未具备的声光提示。 */
 #define APP_NODE_PAUSE_DURATION_MS               (1000U)
 
-/* task3 的 A→C 相对转角，单位 0.001 度；需按实车 Yaw 正方向调参。 */
-#define APP_TASK3_TURN_A_TO_C_MDEG               (-32000L)
+/* task3 的 A→C 相对转角，单位原始角度 LSB；需按实车 Yaw 正方向调参。 */
+#define APP_TASK3_TURN_A_TO_C_RAW               (-5825L)
 
-/* task3 的 B→D 相对转角，单位 0.001 度；需按实车 Yaw 正方向调参。 */
-#define APP_TASK3_TURN_B_TO_D_MDEG               (48500L)
+/* task3 的 B→D 相对转角，单位原始角度 LSB；需按实车 Yaw 正方向调参。 */
+#define APP_TASK3_TURN_B_TO_D_RAW               (8825L)
 
 /* task3 原地转向输出，单位千分比；过大易过冲，过小可能无法克服静摩擦。 */
 #define APP_TASK3_TURN_OUTPUT_PERMILLE           (300)
 
-/* task3 转向到位容差，单位 0.001 度；进入该范围即停止原地转向。 */
-#define APP_TASK3_TURN_TOLERANCE_MDEG            (2000L)
+/* task3 转向到位容差，单位原始角度 LSB；进入该范围即停止原地转向。 */
+#define APP_TASK3_TURN_TOLERANCE_RAW            (364L)
 
 /* 正 Yaw 转向时左轮输出符号；设为 1 或 -1，按实车 Yaw 与电机方向对应关系调节。 */
 #define APP_TASK3_POSITIVE_YAW_LEFT_OUTPUT_SIGN  (-1)

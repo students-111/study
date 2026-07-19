@@ -26,6 +26,8 @@
 
 /* 灰度循迹外环积分限幅；积分关闭时保持为 0。 */
 #define DAL_PID_LINE_ITERM_LIMIT     (0.0f)
+/* 直行角度外环比例系数；输入为 JY901P 原始角度 LSB，已按原 mdeg 输入等效换算。 */
+#define DAL_PID_STRAIGHT_ANGLE_KP_RAW (0.000687f)
 
 /* ======== 类型定义 ======== */
 
